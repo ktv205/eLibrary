@@ -9,12 +9,16 @@ public class AppPreferences {
 	public static final String EMAIL_TAG="email_tag";
 	public static final String AUTH_KEY="Auth_key";
 	public static int test=0;
+	public  static String ipAdd="54.174.122.19";
 	public static abstract class Auth {
 		public static final String AUTHPREF="AUTH_SHAREDPREFERENCES";
 		public static final String KEY_AUTH="AUTH?";
 		public static final int  FACEBOOK_AUTH=1;
 		public static final int GOOGLE_AUTH=0;
 		public static final int EMAIL_AUTH=2;
+		public static final String FACEBOOK_ENUM="fb";
+		public static final String GOOGLE_ENUM="g";
+		public static final String EMAIL_ENUM="gen";
 		public static final int EMAIL_AUTH_CODE=5;
 		public static final String KEY_VERIFICATION="verification";
 		public static final String KEY_NAME="ACCOUTHOLDER_NAME";
@@ -23,7 +27,7 @@ public class AppPreferences {
 		public static final String KEY_PICTURE="PROFILE_PICTURE_LINK";
 		public static final String KEY_FACEBOOKID="FACEBOOK_ID";
 		public static final String KEY_GOOGLEID="GOOGLE_ID";
-		
+		public static final String KEY_PARCELABLE_SIGNUP_VERIFICATION="user_parcelable";
 	}
 	public static abstract class Codes{
 		public static final int RC_SIGN_IN = 6;

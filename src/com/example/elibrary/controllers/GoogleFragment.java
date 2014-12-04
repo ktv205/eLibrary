@@ -2,6 +2,8 @@ package com.example.elibrary.controllers;
 
 import com.example.elibrary.R;
 import com.example.elibrary.models.AppPreferences;
+import com.example.elibrary.models.RequestParams;
+import com.example.elibrary.models.UserModel;
 
 import android.app.Activity;
 import android.content.Context;
@@ -28,7 +30,7 @@ import com.google.android.gms.plus.model.people.Person.Image;
 public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 		OnConnectionFailedListener {
 	/* Request code used to invoke sign in user interactions. */
-
+  private UserModel user;
 	private GoogleApiClient mGoogleApiClient;
 	/*
 	 * A flag indicating that a PendingIntent is in progress and prevents us
@@ -129,7 +131,9 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 		String imageUri = picture.toString();
 		String id = currentPerson.getId();
 		setSharedPreferences(name, email, id, imageUri, auth);
-		startMainActivity();
+		setUserModel(name,email);
+		RequestParams params=setParams();
+		sendDataToServer(params);
 	}
 
 	@Override
@@ -175,10 +179,25 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 	}
 
-	public void startMainActivity() {
-		Intent intent = new Intent(getActivity(), MainActivity.class);
-		startActivity(intent);
-		getActivity().finish();
+	public void setUserModel(String name,String email){
+		user = new UserModel();
+		user.setName(name);
+		user.setEmail(email);
+		user.setAuth(AppPreferences.Auth.GOOGLE_ENUM);
+	}
+	
+	public RequestParams setParams(){
+		RequestParams params=new RequestParams();
+		params.setURI("http://"+AppPreferences.ipAdd+"/test_elibrary.php");
+		params.setMethod("POST");
+		params.setParam("name", user.getName());
+		params.setParam("email", user.getEmail());
+		params.setParam("auth", user.getAuth());
+		return params;
+
+	}
+	public void sendDataToServer(RequestParams params){
+		new AuthAsyncTask(user, getActivity()).execute(params);
 	}
 
 }

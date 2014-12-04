@@ -1,16 +1,17 @@
 package com.example.elibrary.controllers;
 
 import com.example.elibrary.R;
+import com.example.elibrary.models.AppPreferences;
+import com.example.elibrary.models.RequestParams;
 import com.example.elibrary.models.UserModel;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
 public class Signup extends Activity implements OnClickListener {
 	private EditText name_edittext, email_edittext, password_edittext,
@@ -50,26 +51,38 @@ public class Signup extends Activity implements OnClickListener {
 			int flag = getTextFromFields();
 
 			if (flag == NAME_EMPTY) {
-				name_edittext.setFocusable(true);
+				name_edittext.requestFocus();
 				message = "name cant be empty";
 			} else if (flag == EMAIL_EMPTY) {
-				email_edittext.setFocusable(true);
+				email_edittext.requestFocus();
 				message = "email cant be empty";
 			} else if (flag == PASSWORD_EMPTY) {
-				password_edittext.setFocusable(true);
+				password_edittext.requestFocus();
 				message = "password cant be empty";
 			} else if (flag == RETYPE_EMPTY) {
-				reType_edittext.setFocusable(true);
+				reType_edittext.requestFocus();
 				message = "retype cant be empty";
 			} else if (flag == DONT_MATCH) {
 				message = "password do not match";
 			} else {
 				message = "everything looks good";
 				createUserModel();
-				setIntentForVerification();
+				RequestParams params=setParams();
+				new AuthAsyncTask(user,this).execute(params);
 			}
-
+			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 		}
+
+	}
+	public RequestParams setParams(){
+		RequestParams params=new RequestParams();
+		params.setURI("http://"+AppPreferences.ipAdd+"/test_elibrary.php");
+		params.setMethod("POST");
+		params.setParam("name", user.getName());
+		params.setParam("email", user.getEmail());
+		params.setParam("password",user.getPassword());
+		params.setParam("auth", user.getAuth());
+		return params;
 
 	}
 
@@ -92,17 +105,16 @@ public class Signup extends Activity implements OnClickListener {
 			return RESULT_OK;
 		}
 	}
-
+    
 	public void createUserModel() {
 		user = new UserModel();
 		user.setName(name);
 		user.setEmail(email);
 		user.setPassword(password);
-
+		user.setAuth(AppPreferences.Auth.EMAIL_ENUM);
 	}
 
-	public void setIntentForVerification() {
-          Intent intent=new Intent(this, Verification.class);
-	}
+	
+
 
 }

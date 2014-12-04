@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import com.example.elibrary.R;
 import com.example.elibrary.models.AppPreferences;
+import com.example.elibrary.models.RequestParams;
+import com.example.elibrary.models.UserModel;
 import com.facebook.Request;
 import com.facebook.Request.GraphUserCallback;
 import com.facebook.Response;
@@ -28,6 +30,7 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 	private UiLifecycleHelper uiHelper;
 	private SharedPreferences authPref;
 	private SharedPreferences.Editor edit;
+	private UserModel user;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -120,7 +123,9 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 				+ "/picture?type=normal";
 		int auth = 1;
 		setSharedPreferences(name, email, id, imageUri, auth);
-		startMainActivity();
+		setUserModel(name,email);
+		RequestParams params=setParams();
+		sendDataToServer(params);
 	}
 
 	public void setSharedPreferences(String name, String email, String id,
@@ -140,10 +145,25 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 		return context.getSharedPreferences(name, Context.MODE_PRIVATE);
 
 	}
-	public void startMainActivity(){
-		Intent intent=new Intent(getActivity(), MainActivity.class);
-		startActivity(intent);
-		getActivity().finish();
+	public void setUserModel(String name,String email){
+		user = new UserModel();
+		user.setName(name);
+		user.setEmail(email);
+		user.setAuth(AppPreferences.Auth.FACEBOOK_ENUM);
+	}
+	
+	public RequestParams setParams(){
+		RequestParams params=new RequestParams();
+		params.setURI("http://"+AppPreferences.ipAdd+"/test_elibrary.php");
+		params.setMethod("POST");
+		params.setParam("name", user.getName());
+		params.setParam("email", user.getEmail());
+		params.setParam("auth", user.getAuth());
+		return params;
+
+	}
+	public void sendDataToServer(RequestParams params){
+		new AuthAsyncTask(user, getActivity()).execute(params);
 	}
 
 }
