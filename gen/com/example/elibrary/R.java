@@ -2728,6 +2728,7 @@ containing a value of this type.
         public static final int signup_string=0x7f060055;
         public static final int store_picture_message=0x7f060001;
         public static final int store_picture_title=0x7f060000;
+        public static final int string_submit=0x7f060061;
         public static final int verification_label_string=0x7f060060;
         /**  Text on a placeholder buy button when Google Play services is not
          available or up-to-date 

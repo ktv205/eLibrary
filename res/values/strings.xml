@@ -18,6 +18,7 @@
     <string name="name_menu">Name</string>
     <string name="book_category_biography_string">Biography</string>
     <string name="verification_label_string">Verification</string>
+    <string name="string_submit">submit</string>
     <string-array
         name="string_books_category">
         <item

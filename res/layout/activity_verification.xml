@@ -18,6 +18,7 @@
     <Button
         android:id="@+id/submit_button_verification"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="@string/string_submit" />
 
 </LinearLayout>

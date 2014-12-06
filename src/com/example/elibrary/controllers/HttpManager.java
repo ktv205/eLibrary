@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+
 import android.util.Log;
 
 import com.example.elibrary.models.RequestParams;
@@ -55,6 +56,7 @@ public class HttpManager {
 				e.printStackTrace();
 			}
 		}
+
 		BufferedReader reader = null;
 		StringBuilder sb = new StringBuilder();
 		try {
@@ -73,8 +75,7 @@ public class HttpManager {
 			e.printStackTrace();
 		}
 		Log.d(TAG, sb.toString());
-		return "true";
-
+		return sb.toString();
 	}
 
 }

@@ -823,6 +823,7 @@ int string signup_email_string 0x7f060058
 int string signup_string 0x7f060055
 int string store_picture_message 0x7f060001
 int string store_picture_title 0x7f060000
+int string string_submit 0x7f060061
 int string verification_label_string 0x7f060060
 int string wallet_buy_button_place_holder 0x7f060022
 int style AppBaseTheme 0x7f0500f3

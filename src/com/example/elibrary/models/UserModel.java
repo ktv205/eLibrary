@@ -8,13 +8,17 @@ public class UserModel implements Parcelable {
 	private String email;
 	private String password;
 	private String auth;
+	private int user_id;
+	private String code;
 
 	public UserModel(Parcel source) {
 		name = source.readString();
 		email = source.readString();
 		password = source.readString();
+		user_id=source.readInt();
+		code=source.readString();
 	}
-
+     
 	public UserModel() {
 		
 	}
@@ -51,6 +55,22 @@ public class UserModel implements Parcelable {
 		this.auth = auth;
 	}
 
+	public int getUser_id() {
+		return user_id;
+	}
+
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
 	@Override
 	public int describeContents() {
 		// TODO Auto-generated method stub
@@ -77,6 +97,8 @@ public class UserModel implements Parcelable {
 		dest.writeString(name);
 		dest.writeString(email);
 		dest.writeString(password);
+		dest.writeInt(user_id);
+		dest.writeString(code);
 	}
 
 }

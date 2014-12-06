@@ -76,11 +76,11 @@ public class Signup extends Activity implements OnClickListener {
 	}
 	public RequestParams setParams(){
 		RequestParams params=new RequestParams();
-		params.setURI("http://"+AppPreferences.ipAdd+"/test_elibrary.php");
+		params.setURI("http://"+AppPreferences.ipAdd+"/eLibrary/lib/includes/register.inc.php");
 		params.setMethod("POST");
-		params.setParam("name", user.getName());
+		params.setParam("username", user.getName());
 		params.setParam("email", user.getEmail());
-		params.setParam("password",user.getPassword());
+		params.setParam("p",user.getPassword());
 		params.setParam("auth", user.getAuth());
 		return params;
 
