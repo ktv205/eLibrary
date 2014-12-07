@@ -92,9 +92,11 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	}
 
 	public void checkForAuthentication() {
-		Log.d(TAG, "in checkForAuthentication");
 		authPref = getSharedPreferences(context, AppPreferences.Auth.AUTHPREF);
 		auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
+		Log.d(TAG, "in checkForAuthentication");
+		Log.d(TAG, "user_pref->" + auth);
+
 		if (auth == AppPreferences.Auth.EMAIL_AUTH
 				|| auth == AppPreferences.Auth.FACEBOOK_AUTH
 				|| auth == AppPreferences.Auth.GOOGLE_AUTH) {
@@ -137,7 +139,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 				logout.logoutFromGoogle();
 			} else {
 				logout.logoutFromFacebook();
-				
+
 			}
 
 		}
@@ -146,9 +148,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 	@Override
 	public void onCleardFields(boolean cleared) {
-		if(cleared){
+		if (cleared) {
 			checkForAuthentication();
 		}
-		
+
 	}
 }

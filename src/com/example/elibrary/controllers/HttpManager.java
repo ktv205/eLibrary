@@ -9,7 +9,6 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
-
 import android.util.Log;
 
 import com.example.elibrary.models.RequestParams;
@@ -22,7 +21,11 @@ public class HttpManager {
 		Log.d(TAG, params.getEncodedParams());
 		URL url = null;
 		try {
-			url = new URL(params.getURI());
+			if (params.getMethod() == "GET") {
+				url = new URL(params.getURI() + "?" + params.getEncodedParams());
+			} else {
+				url = new URL(params.getURI());
+			}
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}

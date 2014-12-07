@@ -44,13 +44,15 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 		dialog.dismiss();
 		Log.d(TAG, "onPostExecute");
 		int user_id = 0;
+		user_id = parseJsonString(result);
 		Intent intent;
 		if (user.getAuth() == AppPreferences.Auth.EMAIL_ENUM) {
 			Log.d(TAG, "onPostExecute EMAIL_ENUM");
+			Log.d(TAG,"onPostExecute,user_id->"+user_id);
 			Toast.makeText(context, "check your mail", Toast.LENGTH_SHORT)
 					.show();
 			intent = new Intent(context, Verification.class);
-			user_id = parseJsonString(result);
+
 			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_USERID,
 					user_id);
 			intent.putExtra(
@@ -62,6 +64,8 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 			Toast.makeText(context, "successfully signed up",
 					Toast.LENGTH_SHORT).show();
 			intent = new Intent(context, MainActivity.class);
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_USERID,
+					user_id);
 			intent.putExtra(
 					AppPreferences.Auth.KEY_PARCELABLE_SIGNUP_VERIFICATION,
 					user);
@@ -80,7 +84,7 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 			e.printStackTrace();
 		}
 		try {
-			if (obj.getBoolean("success")) {
+			if (obj.getInt("success") == 1) {
 				user_id = obj.getInt("user_id");
 				Log.d(TAG, "user_id->" + user_id);
 				return user_id;
@@ -93,7 +97,6 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 			e.printStackTrace();
 			return 0;
 		}
-
 	}
 
 }
