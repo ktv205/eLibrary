@@ -18,10 +18,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class Signin extends Activity implements OnClickListener {
 	private EditText email_edittext, password_edittext;
+	private TextView forgot_textview;
 	private Button submit;
 	private String email, password;
 	private final static int EMAIL_EMPTY = 1;
@@ -45,7 +47,9 @@ public class Signin extends Activity implements OnClickListener {
 		email_edittext = (EditText) findViewById(R.id.email_edittext_signin);
 		password_edittext = (EditText) findViewById(R.id.password_edittext_signin);
 		submit = (Button) findViewById(R.id.signin_button_signin);
+		forgot_textview = (TextView) findViewById(R.id.signup_textview_forgot);
 		submit.setOnClickListener(this);
+		forgot_textview.setOnClickListener(this);
 
 	}
 
@@ -68,6 +72,10 @@ public class Signin extends Activity implements OnClickListener {
 				new SignInAsycTask().execute(params);
 			}
 			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+		} else if (id == forgot_textview.getId()) {
+			Intent intent = new Intent(this, PasswordRetrival.class);
+			intent.putExtra(AppPreferences.Auth.KEY_PARCELABLE_SIGNIN_PASSWORDRETRIVAL, user);
+			startActivity(intent);
 		}
 	}
 

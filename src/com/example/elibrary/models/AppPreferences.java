@@ -34,6 +34,7 @@ public class AppPreferences {
 		public static final int ERROR_USER_DOESNT_EXIST=2;
 		public static final int ERROR_CONFORMATION_SENT=3;
 		public static final int ERROR_CONFORMATION_DONE=4;
+		public static final String KEY_PARCELABLE_SIGNIN_PASSWORDRETRIVAL="user_parcelable_signin_passwordretrival";
 	}
 
 	public static abstract class Codes {

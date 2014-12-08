@@ -49,7 +49,6 @@ public class Signup extends Activity implements OnClickListener {
 		String message;
 		if (id == submit.getId()) {
 			int flag = getTextFromFields();
-
 			if (flag == NAME_EMPTY) {
 				name_edittext.requestFocus();
 				message = "name cant be empty";
@@ -70,7 +69,7 @@ public class Signup extends Activity implements OnClickListener {
 				RequestParams params=setParams();
 				new AuthAsyncTask(user,this).execute(params);
 			}
-			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+			Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 		}
 
 	}

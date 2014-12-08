@@ -19,9 +19,12 @@
     <string name="book_category_biography_string">Biography</string>
     <string name="verification_label_string">Verification</string>
     <string name="string_submit">submit</string>
-    <string-array
-        name="string_books_category">
-        <item
-            >biography</item>
+    <string name="string_account_retrival">Please enter your email to reset your password</string>
+    <string name="string_label_passwordretrival">Retrival</string>
+    <string name="string_signin_textview_forgot">forgot password?</string>
+
+    <string-array name="string_books_category">
+        <item>biography</item>
     </string-array>
+
 </resources>

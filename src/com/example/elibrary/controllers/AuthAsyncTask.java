@@ -43,23 +43,28 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 	protected void onPostExecute(String result) {
 		dialog.dismiss();
 		Log.d(TAG, "onPostExecute");
+		Log.d(TAG, result);
 		int user_id = 0;
 		user_id = parseJsonString(result);
 		Intent intent;
 		if (user.getAuth() == AppPreferences.Auth.EMAIL_ENUM) {
-			Log.d(TAG, "onPostExecute EMAIL_ENUM");
-			Log.d(TAG,"onPostExecute,user_id->"+user_id);
-			Toast.makeText(context, "check your mail", Toast.LENGTH_SHORT)
-					.show();
-			intent = new Intent(context, Verification.class);
+			if (user_id == 0) {
 
-			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_USERID,
-					user_id);
-			intent.putExtra(
-					AppPreferences.Auth.KEY_PARCELABLE_SIGNUP_VERIFICATION,
-					user);
-			context.startActivity(intent);
-			((Activity) context).finish();
+			} else {
+				Log.d(TAG, "onPostExecute EMAIL_ENUM");
+				Log.d(TAG, "onPostExecute,user_id->" + user_id);
+				Toast.makeText(context, "check your mail", Toast.LENGTH_SHORT)
+						.show();
+				intent = new Intent(context, Verification.class);
+
+				intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_USERID,
+						user_id);
+				intent.putExtra(
+						AppPreferences.Auth.KEY_PARCELABLE_SIGNUP_VERIFICATION,
+						user);
+				context.startActivity(intent);
+				((Activity) context).finish();
+			}
 		} else {
 			Toast.makeText(context, "successfully signed up",
 					Toast.LENGTH_SHORT).show();
@@ -89,13 +94,23 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 				Log.d(TAG, "user_id->" + user_id);
 				return user_id;
 			} else {
-				int error_id = obj.getInt("error_id");
-				Log.d(TAG, "Error_id->" + error_id);
+				renderError(obj);
 				return 0;
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 			return 0;
+		}
+
+	}
+
+	public void renderError(JSONObject obj) {
+		try {
+			Toast.makeText(context, obj.getString("error_msg"),
+					Toast.LENGTH_LONG).show();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

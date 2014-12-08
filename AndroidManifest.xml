@@ -44,9 +44,13 @@
             android:name="com.example.elibrary.controllers.Signup"
             android:label="@string/authentication" >
         </activity>
-        <activity 
+        <activity
             android:name="com.example.elibrary.controllers.Verification"
-            android:label="@string/verification_label_string"></activity>
+            android:label="@string/verification_label_string" >
+        </activity>
+        <activity
+            android:name="com.example.elibrary.controllers.PasswordRetrival"
+            android:label="@string/string_label_passwordretrival" />
 
         <meta-data
             android:name="com.google.android.gms.version"
