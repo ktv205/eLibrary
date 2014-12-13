@@ -4,12 +4,12 @@
 
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="100"
+        android:orderInCategory="101"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
     <item
         android:id="@+id/name_account_menu"
-        android:showAsAction="ifRoom"
+        android:showAsAction="never"
         android:title="@string/name_menu"
         android:visible="true"/>
     <item
@@ -29,5 +29,17 @@
         android:showAsAction="never"
         android:title="@string/string_item_uploads">
     </item>
+     <item
+        android:id="@+id/settings_friends"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/string_item_friends">
+    </item> 
+     <item android:id="@+id/action_search"
+        android:icon="@drawable/ic_action_search"
+        android:title="search"
+        android:showAsAction="collapseActionView|always"
+        android:actionViewClass="android.widget.SearchView"
+       />
 
 </menu>

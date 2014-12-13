@@ -5,18 +5,25 @@ import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
 
 import android.app.Activity;
+import android.app.SearchManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.widget.SearchView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class MainActivity extends Activity implements OnLogoutSuccessful {
@@ -25,15 +32,20 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	private Context context;
 	private Menu menuGlobal;
 	private int auth;
-	private LinearLayout parent;
+	private LinearLayout parentLinear;
+	private ScrollView scrollView;
+	private LayoutInflater mInflater;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		context = getApplicationContext();
-
-		parent = (LinearLayout) findViewById(R.id.parent_linearlayout_main);
+		mInflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		parentLinear = new LinearLayout(this);
+		parentLinear.setOrientation(LinearLayout.VERTICAL);
+		scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
 		Log.d(TAG, "onCreate");
 		if (isConntected()) {
 			Log.d(TAG, "internet connected");
@@ -45,24 +57,37 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 	public void fillWithBooks() {
 		Log.d(TAG, "fillWithBooks");
-		LinearLayout hLinear = new LinearLayout(context);
-		HorizontalScrollView hScrollView = new HorizontalScrollView(context);
-		hLinear.setOrientation(LinearLayout.HORIZONTAL);
-		for (int i = 0; i < 20; i++) {
-			LinearLayout vLinear = new LinearLayout(context);
-			vLinear.setOrientation(LinearLayout.VERTICAL);
-			TextView text = new TextView(context);
-			text.setText("title");
-			ImageView image = new ImageView(context);
-			image.setImageResource(R.drawable.ic_launcher);
-			vLinear.addView(image);
-			vLinear.addView(text);
-			hLinear.addView(vLinear);
+		for (int i = 0; i < 10; i++) {
+			View singleCategory = mInflater.inflate(
+					R.layout.inflate_single_category, null, false);
+			TextView textView = (TextView) singleCategory
+					.findViewById(R.id.single_category_textview_book_category);
+			LinearLayout horizontal = (LinearLayout) singleCategory
+					.findViewById(R.id.single_category_linearlayout_horizontal);
+			textView.setText("category");
 
+			for (int j = 0; j < 20; j++) {
+				View singleBook = mInflater.inflate(
+						R.layout.inflate_singlebook, null, false);
+				ImageView imageView = (ImageView) singleBook
+						.findViewById(R.id.single_book_cover);
+				imageView.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+
+					}
+				});
+				horizontal.addView(singleBook);
+			}
+			if (parentLinear != null) {
+				parentLinear.addView(singleCategory);
+
+			}
 		}
-		hScrollView.addView(hLinear);
-		parent.addView(hScrollView);
-		setContentView(parent);
+		scrollView.addView(parentLinear);
+		setContentView(scrollView);
 
 	}
 
@@ -118,9 +143,21 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Log.d(TAG, "onCreateOptionsMenu");
 		getMenuInflater().inflate(R.menu.main, menu);
+		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+		SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+				.getActionView();
+		ComponentName cn = new ComponentName(this, SearchActivity.class);
+		searchView.setSearchableInfo(searchManager.getSearchableInfo(cn));
+
 		menuGlobal = menu;
 		setMenuName();
 		return true;
+	}
+
+	@Override
+	public void startActivity(Intent intent) {
+		super.startActivity(intent);
+		Log.d(TAG, "in onStartActivity");
 	}
 
 	@Override
