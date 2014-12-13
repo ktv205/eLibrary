@@ -54,10 +54,12 @@ public class Authentication extends FragmentActivity implements
 		FacebookFragment fb = new FacebookFragment();
 		GoogleFragment g = new GoogleFragment();
 		EmailFragment emailFragment = new EmailFragment();
+		fb.setArguments(bundle);
 		fragmentTransaction.add(R.id.linear_authentication, fb,
 				AppPreferences.FB_TAG);
 		// fragmentTransaction.commit();
 		// fragmentTransaction=fragmentManager.beginTransaction();
+		g.setArguments(bundle);
 		fragmentTransaction.add(R.id.linear_authentication, g,
 				AppPreferences.G_TAG);
 		// fragmentTransaction.commit();
@@ -74,6 +76,7 @@ public class Authentication extends FragmentActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.d(TAG,"onResume"+fragmentFlag);
 		 if(new CheckAuthentication().checkForAuthentication(this)){
 		   //startActivity(new Intent(this,MainActivity.class));
 			 fragmentFlag=1;
@@ -112,7 +115,8 @@ public class Authentication extends FragmentActivity implements
 	}
 	@Override
 	public void onBackPressed() {
-		if(fragmentFlag==1){
+		Log.d(TAG,"onBackPressed->"+fragmentFlag);
+		if(fragmentFlag==0 || fragmentFlag==1){
 			super.onBackPressed();
 		}else if(fragmentFlag==2){
 			fragmentManager = getSupportFragmentManager();

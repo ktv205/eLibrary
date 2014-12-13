@@ -129,7 +129,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		if (id == R.id.action_settings) {
 			return true;
 		} else if (id == R.id.name_account_menu) {
-			Log.d(TAG, "clicked name_account_name");
+			startActivity(new Intent(this, Profile.class));
+		} else if (id == R.id.settings_logout) {
+			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
 			auth = getSharedPreferences(AppPreferences.Auth.AUTHPREF,
 					MODE_PRIVATE).getInt(AppPreferences.AUTH_KEY, -1);
@@ -140,7 +142,8 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			} else {
 				logout.clearSharedPref();
 			}
-
+		} else if (id == R.id.settings_uploads) {
+			startActivity(new Intent(this, Uploads.class));
 		}
 		return super.onOptionsItemSelected(item);
 	}

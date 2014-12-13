@@ -30,34 +30,40 @@
         </activity>
         <activity
             android:name="com.example.elibrary.controllers.Authentication"
-            android:label="@string/authentication"
-             >
+            android:label="@string/authentication" 
+            android:noHistory="true">
         </activity>
         <activity
             android:name="com.facebook.LoginActivity"
-            android:label="title_facebook_login"
-             >
+            android:label="title_facebook_login" >
         </activity>
         <activity
             android:name="com.example.elibrary.controllers.Signin"
-            android:label="@string/authentication"
-             >
+            android:label="@string/authentication" >
         </activity>
         <activity
             android:name="com.example.elibrary.controllers.Signup"
-            android:label="@string/authentication"
-             >
+            android:label="@string/authentication" >
         </activity>
         <activity
             android:name="com.example.elibrary.controllers.Verification"
-            android:label="@string/verification_label_string" 
-            >
+            android:label="@string/verification_label_string" >
         </activity>
         <activity
             android:name="com.example.elibrary.controllers.PasswordRetrival"
-            android:label="@string/string_label_passwordretrival"
-             />
-
+            android:label="@string/string_label_passwordretrival" />
+        <activity
+            android:name="com.example.elibrary.controllers.PasswordReSubmission"
+            android:label="@string/string_label_passwordReSubmission" >
+        </activity>
+         <activity
+            android:name="com.example.elibrary.controllers.Profile"
+            android:label="@string/string_label_profile" >
+        </activity>
+         <activity
+            android:name="com.example.elibrary.controllers.Uploads"
+            android:label="@string/string_label_uploads" >
+        </activity>
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
