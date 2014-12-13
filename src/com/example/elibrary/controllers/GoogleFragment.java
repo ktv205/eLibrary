@@ -188,7 +188,7 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 	
 	public RequestParams setParams(){
 		RequestParams params=new RequestParams();
-		params.setURI("http://"+AppPreferences.ipAdd+"/test_elibrary.php");
+		params.setURI("http://"+AppPreferences.ipAdd+"/eLibrary/lib/includes/register.inc.php");
 		params.setMethod("POST");
 		params.setParam("name", user.getName());
 		params.setParam("email", user.getEmail());

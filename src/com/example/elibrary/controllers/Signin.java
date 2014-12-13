@@ -74,7 +74,9 @@ public class Signin extends Activity implements OnClickListener {
 			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 		} else if (id == forgot_textview.getId()) {
 			Intent intent = new Intent(this, PasswordRetrival.class);
-			intent.putExtra(AppPreferences.Auth.KEY_PARCELABLE_SIGNIN_PASSWORDRETRIVAL, user);
+			intent.putExtra(
+					AppPreferences.Auth.KEY_PARCELABLE_SIGNIN_PASSWORDRETRIVAL,
+					user);
 			startActivity(intent);
 		}
 	}
@@ -101,6 +103,15 @@ public class Signin extends Activity implements OnClickListener {
 		params.setParam("mobile", "1");
 		return params;
 
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// if(new CheckAuthentication().checkForAuthentication(this)){
+		// startActivity(new Intent(this,MainActivity.class));
+		// finish();
+		// }
 	}
 
 	public void createUserModel() {
@@ -159,6 +170,7 @@ public class Signin extends Activity implements OnClickListener {
 		authPref = getSharedPreferences(AppPreferences.Auth.AUTHPREF,
 				MODE_PRIVATE);
 		edit = authPref.edit();
+		Log.d(TAG, "Name in signIn->" + user.getName());
 		edit.putString(AppPreferences.Auth.KEY_NAME, user.getName());
 		edit.putString(AppPreferences.Auth.KEY_EMAIL, user.getEmail());
 		edit.putInt(AppPreferences.Auth.KEY_AUTH,

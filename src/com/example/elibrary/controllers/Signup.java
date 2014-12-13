@@ -6,6 +6,7 @@ import com.example.elibrary.models.RequestParams;
 import com.example.elibrary.models.UserModel;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,6 +43,15 @@ public class Signup extends Activity implements OnClickListener {
 		submit.setOnClickListener(this);
 
 	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// if(new CheckAuthentication().checkForAuthentication(this)){
+		// startActivity(new Intent(this,MainActivity.class));
+		// finish();
+		// }
+    }
 
 	@Override
 	public void onClick(View v) {

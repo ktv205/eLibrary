@@ -73,7 +73,7 @@ public class Logout  implements ConnectionCallbacks, OnConnectionFailedListener 
 
 	@Override
 	public void onConnected(Bundle arg0) {
-		dialog.dismiss();
+		
 		Log.d(TAG, "in connected");
 		Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 		mGoogleApiClient.disconnect();
@@ -98,6 +98,7 @@ public class Logout  implements ConnectionCallbacks, OnConnectionFailedListener 
 		Log.d(TAG, "cleared the fields");
 		obj=(OnLogoutSuccessful)context;
 		obj.onCleardFields(true);
+		
 	}
 
 }

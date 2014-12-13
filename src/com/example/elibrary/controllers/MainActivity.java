@@ -93,15 +93,11 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 	public void checkForAuthentication() {
 		authPref = getSharedPreferences(context, AppPreferences.Auth.AUTHPREF);
-		auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
-		Log.d(TAG, "in checkForAuthentication");
-		Log.d(TAG, "user_pref->" + auth);
+		if (new CheckAuthentication().checkForAuthentication(context)) {
+			Log.d(TAG, "in checkForAuthentication and it is true");
 
-		if (auth == AppPreferences.Auth.EMAIL_AUTH
-				|| auth == AppPreferences.Auth.FACEBOOK_AUTH
-				|| auth == AppPreferences.Auth.GOOGLE_AUTH) {
+			// Log.d(TAG, "user_pref->" + auth);
 			setMenuName();
-
 		} else {
 			Intent intent = new Intent(this, Authentication.class);
 			startActivity(intent);
@@ -135,11 +131,14 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		} else if (id == R.id.name_account_menu) {
 			Log.d(TAG, "clicked name_account_name");
 			Logout logout = new Logout(this);
+			auth = getSharedPreferences(AppPreferences.Auth.AUTHPREF,
+					MODE_PRIVATE).getInt(AppPreferences.AUTH_KEY, -1);
 			if (auth == AppPreferences.Auth.GOOGLE_AUTH) {
 				logout.logoutFromGoogle();
-			} else {
+			} else if (auth == AppPreferences.Auth.FACEBOOK_AUTH) {
 				logout.logoutFromFacebook();
-
+			} else {
+				logout.clearSharedPref();
 			}
 
 		}

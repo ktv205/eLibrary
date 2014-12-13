@@ -9,7 +9,7 @@ public class AppPreferences {
 	public static final String EMAIL_TAG = "email_tag";
 	public static final String AUTH_KEY = "Auth_key";
 	public static int test = 0;
-	public static String ipAdd = "54.174.122.19";
+	public static String ipAdd = "54.174.223.185";
 
 	public static abstract class Auth {
 		public static final String AUTHPREF = "AUTH_SHAREDPREFERENCES";

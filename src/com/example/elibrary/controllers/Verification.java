@@ -43,6 +43,15 @@ public class Verification extends Activity implements OnClickListener {
 		initialize();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if (new CheckAuthentication().checkForAuthentication(this)) {
+			startActivity(new Intent(this, MainActivity.class));
+			finish();
+		}
+	}
+
 	public void initialize() {
 		Log.d(TAG, "initialize()");
 		code_edittext = (EditText) findViewById(R.id.code_edittext_verification);
@@ -65,8 +74,8 @@ public class Verification extends Activity implements OnClickListener {
 			} else {
 				message = "everything looks good";
 				createUserModel();
-				 RequestParams params = setParams();
-				 new VerificationAsyncTask().execute(params);
+				RequestParams params = setParams();
+				new VerificationAsyncTask().execute(params);
 			}
 			Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 		}
@@ -114,7 +123,7 @@ public class Verification extends Activity implements OnClickListener {
 		@Override
 		protected void onPostExecute(String result) {
 			Log.d(TAG, "onPostExecute");
-			if (parseJsonObject(result)!= 0) {
+			if (parseJsonObject(result) != 0) {
 				Log.d(TAG, "onPostExecute and result!=0");
 				user.setUser_id(user_id);
 				setSharedPreferences();
@@ -131,7 +140,7 @@ public class Verification extends Activity implements OnClickListener {
 		try {
 			obj = new JSONObject(result);
 			if (obj.getInt("success") == 1) {
-				user_id=obj.getInt("user_id");
+				user_id = obj.getInt("user_id");
 				return user_id;
 			} else {
 				return 0;
@@ -145,13 +154,14 @@ public class Verification extends Activity implements OnClickListener {
 	}
 
 	public void setSharedPreferences() {
-		Log.d(TAG,"setSharedPreferences");
+		Log.d(TAG, "setSharedPreferences");
 		authPref = getSharedPreferences(AppPreferences.Auth.AUTHPREF,
 				MODE_PRIVATE);
 		edit = authPref.edit();
 		edit.putString(AppPreferences.Auth.KEY_NAME, user.getName());
 		edit.putString(AppPreferences.Auth.KEY_EMAIL, user.getEmail());
-		edit.putInt(AppPreferences.Auth.KEY_AUTH, AppPreferences.Auth.EMAIL_AUTH);
+		edit.putInt(AppPreferences.Auth.KEY_AUTH,
+				AppPreferences.Auth.EMAIL_AUTH);
 		edit.putInt(AppPreferences.Auth.KEY_USERID, user.getUser_id());
 		edit.commit();
 	}
