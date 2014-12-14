@@ -34,6 +34,7 @@
     <string name="string_item_friends">friends</string>
     <string name="string_label_search_activity">Search Friends</string>
     <string name="string_label_friends">Friends</string>
+    <string name="string_book_title">book title</string>
     <string-array name="string_books_category">
         <item>biography</item>
     </string-array>

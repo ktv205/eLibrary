@@ -75,7 +75,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 					@Override
 					public void onClick(View v) {
-						// TODO Auto-generated method stub
+						startActivity(new Intent(MainActivity.this, Book.class));
 
 					}
 				});
@@ -163,9 +163,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		} else if (id == R.id.name_account_menu) {
+		if (id == R.id.name_account_menu) {
 			startActivity(new Intent(this, Profile.class));
 		} else if (id == R.id.settings_logout) {
 			Log.d(TAG, "clicked logout");
@@ -181,6 +179,8 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			}
 		} else if (id == R.id.settings_uploads) {
 			startActivity(new Intent(this, Uploads.class));
+		} else if (id == R.id.settings_friends) {
+			startActivity(new Intent(this, Friends.class));
 		}
 		return super.onOptionsItemSelected(item);
 	}

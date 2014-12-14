@@ -20,25 +20,27 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 public class Profile extends Activity implements OnLogoutSuccessful {
-	private static final String TAG="Profile";
+	private static final String TAG = "Profile";
 	private Menu menuGlobal;
 	private SharedPreferences authPref;
 	private int auth;
 	private Context context;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_profile);
-		context=getApplicationContext();
-		authPref=getSharedPreferences(this, AppPreferences.Auth.AUTHPREF);
+		context = getApplicationContext();
+		authPref = getSharedPreferences(this, AppPreferences.Auth.AUTHPREF);
 		if (isConntected()) {
 			Log.d(TAG, "internet connected");
-		}else{
-			TextView text=new TextView(this);
+		} else {
+			TextView text = new TextView(this);
 			text.setText("Not connected to a network!");
 			setContentView(text);
 		}
 	}
+
 	public boolean isConntected() {
 		Log.d(TAG, "isConnected method");
 		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -50,33 +52,34 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		}
 
 	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		if (isConntected()) {
+			checkForAuthentication();
 			Log.d(TAG, "internet connected");
-		}else{
-			TextView text=new TextView(this);
+		} else {
+			TextView text = new TextView(this);
 			text.setText("Not connected to a network!");
 			setContentView(text);
 		}
 	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Log.d(TAG, "onCreateOptionsMenu");
 		getMenuInflater().inflate(R.menu.main, menu);
-		getMenuInflater().inflate(R.menu.main, menu);
-		SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.action_search).getActionView();
-        ComponentName cn = new ComponentName(this, SearchActivity.class);
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(cn));
+		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+		SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+				.getActionView();
+		ComponentName cn = new ComponentName(this, SearchActivity.class);
+		searchView.setSearchableInfo(searchManager.getSearchableInfo(cn));
 		menuGlobal = menu;
 		setMenuName();
 		return true;
 	}
+
 	public SharedPreferences getSharedPreferences(Context context, String name) {
 		Log.d(TAG, "getSharedPreferences method");
 		return context.getSharedPreferences(name, Context.MODE_PRIVATE);
@@ -90,6 +93,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					"Name"));
 		}
 	}
+
 	public void checkForAuthentication() {
 		if (new CheckAuthentication().checkForAuthentication(context)) {
 			Log.d(TAG, "in checkForAuthentication and it is true");
@@ -100,12 +104,11 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 			finish();
 		}
 	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}else if(id==R.id.settings_logout){
+		if (id == R.id.settings_logout) {
 			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
 			auth = authPref.getInt(AppPreferences.AUTH_KEY, -1);
@@ -116,18 +119,21 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 			} else {
 				logout.clearSharedPref();
 			}
-		}else if(id==R.id.settings_library){
+		} else if (id == R.id.settings_library) {
 			startActivity(new Intent(this, MainActivity.class));
-		}else if (id == R.id.settings_uploads) {
+		} else if (id == R.id.settings_uploads) {
 			startActivity(new Intent(this, Uploads.class));
+		} else if (id == R.id.settings_friends) {
+			startActivity(new Intent(this, Friends.class));
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
 	@Override
 	public void onCleardFields(boolean cleared) {
-		if(cleared){
+		if (cleared) {
 			checkForAuthentication();
 		}
-		
+
 	}
 }

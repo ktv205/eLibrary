@@ -83,6 +83,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		super.onResume();
 		if (isConntected()) {
 			Log.d(TAG, "internet connected");
+			checkForAuthentication();
 		} else {
 			TextView text = new TextView(this);
 			text.setText("Not connected to a network!");
@@ -106,14 +107,12 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Log.d(TAG, "onCreateOptionsMenu");
 		getMenuInflater().inflate(R.menu.main, menu);
-		
-		SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.action_search).getActionView();
-        ComponentName cn = new ComponentName(this, SearchActivity.class);
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(cn));
+
+		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+		SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+				.getActionView();
+		ComponentName cn = new ComponentName(this, SearchActivity.class);
+		searchView.setSearchableInfo(searchManager.getSearchableInfo(cn));
 		menuGlobal = menu;
 		setMenuName();
 		return true;
@@ -122,9 +121,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		} else if (id == R.id.settings_logout) {
+		if (id == R.id.settings_logout) {
 			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
 			auth = authPref.getInt(AppPreferences.AUTH_KEY, -1);
@@ -139,6 +136,8 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			startActivity(new Intent(this, MainActivity.class));
 		} else if (id == R.id.name_account_menu) {
 			startActivity(new Intent(this, Profile.class));
+		} else if (id == R.id.settings_friends) {
+			startActivity(new Intent(this, Friends.class));
 		}
 		return true;
 	}
