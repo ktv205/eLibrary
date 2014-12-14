@@ -210,13 +210,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 
 					@Override
 					public void run() {
-						final AmazonS3Client client = new AmazonS3Client(
-								new BasicAWSCredentials("AKIAJ4YX333DR4DM4DUQ",
-										"kScJ0H1axGW3ztuuuzBJdEYmRunOEYFCz45m4r0l"));
-
-						PutObjectRequest por = new PutObjectRequest(
-								"songbirdsongs", "test", file);
-						client.putObject(por);
+						
 
 					}
 				});
