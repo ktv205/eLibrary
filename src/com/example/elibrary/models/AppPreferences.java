@@ -10,6 +10,8 @@ public class AppPreferences {
 	public static final String AUTH_KEY = "Auth_key";
 	public static int test = 0;
 	public static String ipAdd = "54.174.223.185";
+	public static final int BOOKSEARCH=7;
+	public static final int FRIENDSEARCH=8;
 
 	public static abstract class Auth {
 		public static final String AUTHPREF = "AUTH_SHAREDPREFERENCES";
@@ -43,6 +45,7 @@ public class AppPreferences {
 
 	public static abstract class PutExtraKeys {
 		public static final String PUTEXTRA_USERID = "putextrakey";
+		public static final String PUTEXTRA_SEARCHTYPE="searchtype";
 	}
 
 }

@@ -10,6 +10,7 @@ public class UserModel implements Parcelable {
 	private String auth;
 	private int user_id;
 	private String code;
+	private String profilePic;
 
 	public UserModel(Parcel source) {
 		name = source.readString();
@@ -17,6 +18,7 @@ public class UserModel implements Parcelable {
 		password = source.readString();
 		user_id=source.readInt();
 		code=source.readString();
+		profilePic=source.readString();
 	}
      
 	public UserModel() {
@@ -70,6 +72,15 @@ public class UserModel implements Parcelable {
 	public void setCode(String code) {
 		this.code = code;
 	}
+	
+
+	public String getProfilePic() {
+		return profilePic;
+	}
+
+	public void setProfilePic(String profilePic) {
+		this.profilePic = profilePic;
+	}
 
 	@Override
 	public int describeContents() {
@@ -99,6 +110,7 @@ public class UserModel implements Parcelable {
 		dest.writeString(password);
 		dest.writeInt(user_id);
 		dest.writeString(code);
+		dest.writeString(profilePic);
 	}
 
 }

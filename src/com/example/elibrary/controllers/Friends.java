@@ -49,9 +49,9 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.d(TAG,"onCreateOptionsmenu");
+		Log.d(TAG, "onCreateOptionsmenu");
 		getMenuInflater().inflate(R.menu.main, menu);
-		menuGlobal=menu;
+		menuGlobal = menu;
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
 				.getActionView();
@@ -100,7 +100,6 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		if (new CheckAuthentication().checkForAuthentication(context)) {
 			Log.d(TAG, "in checkForAuthentication and it is true");
 
-			// Log.d(TAG, "user_pref->" + auth);
 			setMenuName();
 		} else {
 			Intent intent = new Intent(this, Authentication.class);

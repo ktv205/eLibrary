@@ -98,7 +98,7 @@ public class Signin extends Activity implements OnClickListener {
 		params.setURI("http://" + AppPreferences.ipAdd
 				+ "/eLibrary/lib/includes/process_login.php");
 		params.setMethod("POST");
-		params.setParam("email", user.getEmail());
+		params.setParam("user_email", user.getEmail());
 		params.setParam("p", user.getPassword());
 		params.setParam("mobile", "1");
 		return params;

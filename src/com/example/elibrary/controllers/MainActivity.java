@@ -5,6 +5,7 @@ import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.SearchView;
 import android.util.Log;
@@ -20,7 +22,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -41,6 +42,13 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		context = getApplicationContext();
+		authPref = getSharedPreferences(context, AppPreferences.Auth.AUTHPREF);
+		String name = authPref.getString(AppPreferences.Auth.KEY_NAME, "name");
+		String email = authPref.getString(AppPreferences.Auth.KEY_EMAIL,
+				"email");
+		int auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
+		Log.d(TAG, "name->" + name + "email->" + email + "auth->" + auth);
+
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		parentLinear = new LinearLayout(this);
@@ -49,9 +57,18 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		Log.d(TAG, "onCreate");
 		if (isConntected()) {
 			Log.d(TAG, "internet connected");
-			checkForAuthentication();
+			if (checkForAuthentication()) {
+				setMenuName();
+				fetchData();
+				fillWithBooks();
+			} else {
+
+			}
 		}
-		fillWithBooks();
+
+	}
+
+	public void fetchData() {
 
 	}
 
@@ -95,7 +112,13 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	protected void onResume() {
 		super.onResume();
 		Log.d(TAG, "onResume");
-		checkForAuthentication();
+		if (checkForAuthentication()) {
+			setMenuName();
+			// fetchData();
+			// fillWithBooks();
+		} else {
+			logout();
+		}
 
 	}
 
@@ -116,17 +139,13 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 	}
 
-	public void checkForAuthentication() {
-		authPref = getSharedPreferences(context, AppPreferences.Auth.AUTHPREF);
+	public boolean checkForAuthentication() {
 		if (new CheckAuthentication().checkForAuthentication(context)) {
 			Log.d(TAG, "in checkForAuthentication and it is true");
+			return true;
 
-			// Log.d(TAG, "user_pref->" + auth);
-			setMenuName();
 		} else {
-			Intent intent = new Intent(this, Authentication.class);
-			startActivity(intent);
-			finish();
+			return false;
 		}
 	}
 
@@ -156,8 +175,12 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 	@Override
 	public void startActivity(Intent intent) {
-		super.startActivity(intent);
 		Log.d(TAG, "in onStartActivity");
+		if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+			Log.d(TAG,"intent.getAction");
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE, AppPreferences.BOOKSEARCH);
+		}
+		super.startActivity(intent);
 	}
 
 	@Override
@@ -168,13 +191,16 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		} else if (id == R.id.settings_logout) {
 			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
-			auth = getSharedPreferences(AppPreferences.Auth.AUTHPREF,
-					MODE_PRIVATE).getInt(AppPreferences.AUTH_KEY, -1);
+			auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
+			Log.d(TAG, "auth in logout->" + auth);
 			if (auth == AppPreferences.Auth.GOOGLE_AUTH) {
+				Log.d(TAG, "logout fron google");
 				logout.logoutFromGoogle();
 			} else if (auth == AppPreferences.Auth.FACEBOOK_AUTH) {
+				Log.d(TAG, "logout fron facebook");
 				logout.logoutFromFacebook();
 			} else {
+				Log.d(TAG, "logout from email");
 				logout.clearSharedPref();
 			}
 		} else if (id == R.id.settings_uploads) {
@@ -188,7 +214,44 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	@Override
 	public void onCleardFields(boolean cleared) {
 		if (cleared) {
-			checkForAuthentication();
+			if (checkForAuthentication()) {
+				setMenuName();
+				// fetchData();
+				// fillWithBooks();
+			} else {
+				logout();
+			}
+		}
+
+	}
+
+	public void logout() {
+		Intent intent = new Intent(this, Authentication.class);
+		startActivity(intent);
+		finish();
+	}
+
+	public void setParams() {
+
+	}
+
+	public class FetchBooksAsyncTask extends AsyncTask<Void, Void, Void> {
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(MainActivity.this);
+			dialog.show();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			dialog.dismiss();
 		}
 
 	}

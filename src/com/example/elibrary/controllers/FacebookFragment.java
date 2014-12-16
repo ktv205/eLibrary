@@ -31,6 +31,7 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 	private SharedPreferences authPref;
 	private SharedPreferences.Editor edit;
 	private UserModel user;
+	private boolean signup = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,20 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 		authButton.setFragment(this);
 
 		return view;
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		Bundle bundle = new Bundle();
+		bundle = getArguments();
+		if (bundle.getInt(AppPreferences.AUTH_KEY) == AppPreferences.SIGNIN) {
+			Log.d(TAG, "in onActivityCreated if user selected signin");
+			signup = false;
+		} else if (getArguments().getInt(AppPreferences.AUTH_KEY) == AppPreferences.SIGNUP) {
+			Log.d(TAG, "in onActivityCreated if user selected signup");
+			signup = true;
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -123,8 +138,8 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 				+ "/picture?type=normal";
 		int auth = 1;
 		setSharedPreferences(name, email, id, imageUri, auth);
-		setUserModel(name,email);
-		RequestParams params=setParams();
+		setUserModel(name, email, imageUri);
+		RequestParams params = setParams();
 		sendDataToServer(params);
 	}
 
@@ -145,24 +160,37 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 		return context.getSharedPreferences(name, Context.MODE_PRIVATE);
 
 	}
-	public void setUserModel(String name,String email){
+
+	public void setUserModel(String name, String email, String imageUri) {
 		user = new UserModel();
 		user.setName(name);
 		user.setEmail(email);
 		user.setAuth(AppPreferences.Auth.FACEBOOK_ENUM);
+		user.setProfilePic(imageUri);
 	}
-	
-	public RequestParams setParams(){
-		RequestParams params=new RequestParams();
-		params.setURI("http://"+AppPreferences.ipAdd+"/test_elibrary.php");
+
+	public RequestParams setParams() {
+		RequestParams params = new RequestParams();
 		params.setMethod("POST");
-		params.setParam("name", user.getName());
-		params.setParam("email", user.getEmail());
-		params.setParam("auth", user.getAuth());
+		params.setParam("user_email", user.getEmail());
+		params.setParam("user_auth", user.getAuth());
+		params.setParam("mobile", "1");
+
+		if (signup) {
+			params.setParam("user_name", user.getName());
+			params.setURI("http://" + AppPreferences.ipAdd
+					+ "/eLibrary/lib/includes/register.inc.php");
+			params.setParam("user_pic", user.getProfilePic());
+		} else {
+			params.setURI("http://" + AppPreferences.ipAdd
+					+ "/eLibrary/lib/includes/process_login.php");
+
+		}
 		return params;
 
 	}
-	public void sendDataToServer(RequestParams params){
+
+	public void sendDataToServer(RequestParams params) {
 		new AuthAsyncTask(user, getActivity()).execute(params);
 	}
 

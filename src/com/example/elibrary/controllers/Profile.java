@@ -40,7 +40,15 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 			setContentView(text);
 		}
 	}
-
+    @Override
+    public void startActivity(Intent intent) {
+    	Log.d(TAG, "in onStartActivity");
+		if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+			Log.d(TAG,"intent.getAction");
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE, AppPreferences.FRIENDSEARCH);
+		}
+		super.startActivity(intent);
+    }
 	public boolean isConntected() {
 		Log.d(TAG, "isConnected method");
 		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

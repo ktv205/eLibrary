@@ -64,7 +64,15 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			setContentView(text);
 		}
 	}
-
+	@Override
+    public void startActivity(Intent intent) {
+    	Log.d(TAG, "in onStartActivity");
+		if(Intent.ACTION_SEARCH.equals(intent.getAction())){
+			Log.d(TAG,"intent.getAction");
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE, AppPreferences.BOOKSEARCH);
+		}
+		super.startActivity(intent);
+    }
 	public void initialize() {
 		uploadButton = (Button) findViewById(R.id.uploads_button_uplaod);
 		submitButton = (Button) findViewById(R.id.uploads_button_submit);
@@ -191,26 +199,32 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		if (requestCode == PICK_FILE_REQUEST) {
 			if (resultCode == RESULT_OK) {
 				Log.d(TAG, "URI->" + data.getData().getPath());
-
-				Cursor contentCursor = getContentResolver().query(
-						data.getData(), null, null, null, null);
-				Log.d(TAG, "column count->" + contentCursor.getColumnCount());
-
-				for (int i = 0; i < contentCursor.getColumnCount(); i++) {
-					Log.d(TAG, contentCursor.getColumnName(i));
+				Log.d(TAG, "URI->" + data.getDataString());
+				File file=new File(data.getData().getPath());
+				if(file.exists()){
+					Log.d(TAG,"file exists");
+				}else{
+					Log.d(TAG,"file does not exists");
 				}
-				contentCursor.moveToFirst();
-				String documentId = contentCursor.getString(contentCursor
-						.getColumnIndex("document_id"));
-				Log.d(TAG, documentId + "");
-				final File file = new File("/storage/emulated/0/Download/"
-						+ contentCursor.getString(contentCursor
-								.getColumnIndex("_display_name")));
+				// Cursor contentCursor = getContentResolver().query(
+				// data.getData(), null, null, null, null);
+				// Log.d(TAG, "column count->" +
+				// contentCursor.getColumnCount());
+				//
+				// for (int i = 0; i < contentCursor.getColumnCount(); i++) {
+				// Log.d(TAG, contentCursor.getColumnName(i));
+				// }
+				// contentCursor.moveToFirst();
+				// String documentId = contentCursor.getString(contentCursor
+				// .getColumnIndex("document_id"));
+				// Log.d(TAG, documentId + "");
+				// final File file = new File("/storage/emulated/0/Download/"
+				// + contentCursor.getString(contentCursor
+				// .getColumnIndex("_display_name")));
 				Thread thread = new Thread(new Runnable() {
 
 					@Override
 					public void run() {
-						
 
 					}
 				});

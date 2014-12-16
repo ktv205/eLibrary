@@ -30,8 +30,9 @@ import com.google.android.gms.plus.model.people.Person.Image;
 public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 		OnConnectionFailedListener {
 	/* Request code used to invoke sign in user interactions. */
-  private UserModel user;
+	private UserModel user;
 	private GoogleApiClient mGoogleApiClient;
+	private boolean signup = false;
 	/*
 	 * A flag indicating that a PendingIntent is in progress and prevents us
 	 * from starting further intents.
@@ -60,6 +61,15 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		Bundle bundle = new Bundle();
+		bundle = getArguments();
+		if (bundle.getInt(AppPreferences.AUTH_KEY) == AppPreferences.SIGNIN) {
+			Log.d(TAG, "in onActivityCreated if user selected signin");
+			signup = false;
+		} else if (getArguments().getInt(AppPreferences.AUTH_KEY) == AppPreferences.SIGNUP) {
+			Log.d(TAG, "in onActivityCreated if user selected signup");
+			signup = true;
+		}
 		view.findViewById(R.id.login_button_google_fragment)
 				.setOnClickListener(new OnClickListener() {
 
@@ -121,6 +131,7 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 	@Override
 	public void onConnected(Bundle arg0) {
+		Log.d(TAG, "in onConnected");
 		mSignInClicked = false;
 		Person currentPerson = Plus.PeopleApi
 				.getCurrentPerson(mGoogleApiClient);
@@ -131,8 +142,8 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 		String imageUri = picture.toString();
 		String id = currentPerson.getId();
 		setSharedPreferences(name, email, id, imageUri, auth);
-		setUserModel(name,email);
-		RequestParams params=setParams();
+		setUserModel(name, email, imageUri);
+		RequestParams params = setParams();
 		sendDataToServer(params);
 	}
 
@@ -162,6 +173,7 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 	public void setSharedPreferences(String name, String email, String id,
 			String imageUri, int auth) {
+		Log.d(TAG, "in setSharedPreferences");
 		authPref = getSharedPreferences(getActivity(),
 				AppPreferences.Auth.AUTHPREF);
 		edit = authPref.edit();
@@ -179,24 +191,39 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 	}
 
-	public void setUserModel(String name,String email){
+	public void setUserModel(String name, String email, String imageUri) {
+		Log.d(TAG, "setUserModel");
 		user = new UserModel();
 		user.setName(name);
 		user.setEmail(email);
 		user.setAuth(AppPreferences.Auth.GOOGLE_ENUM);
+		user.setProfilePic(imageUri);
 	}
-	
-	public RequestParams setParams(){
-		RequestParams params=new RequestParams();
-		params.setURI("http://"+AppPreferences.ipAdd+"/eLibrary/lib/includes/register.inc.php");
+
+	public RequestParams setParams() {
+		RequestParams params = new RequestParams();
+
 		params.setMethod("POST");
-		params.setParam("name", user.getName());
-		params.setParam("email", user.getEmail());
-		params.setParam("auth", user.getAuth());
+
+		params.setParam("user_email", user.getEmail());
+		params.setParam("user_auth", user.getAuth());
+		params.setParam("mobile", "1");
+		
+		if (signup) {
+			params.setParam("user_name", user.getName());
+			params.setURI("http://" + AppPreferences.ipAdd
+					+ "/eLibrary/lib/includes/register.inc.php");
+			params.setParam("user_pic", user.getProfilePic());
+		} else {
+			params.setURI("http://" + AppPreferences.ipAdd
+					+ "/eLibrary/lib/includes/process_login.php");
+
+		}
 		return params;
 
 	}
-	public void sendDataToServer(RequestParams params){
+
+	public void sendDataToServer(RequestParams params) {
 		new AuthAsyncTask(user, getActivity()).execute(params);
 	}
 
