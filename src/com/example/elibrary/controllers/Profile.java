@@ -210,6 +210,14 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 			startActivity(new Intent(this, Uploads.class));
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
+		} else if (id == R.id.name_account_menu) {
+			if (who == AppPreferences.FRIEND || who == AppPreferences.STRANGER) {
+				Intent intent = new Intent(this, Profile.class);
+				intent.putExtra(
+						AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
+						AppPreferences.SELF);
+				startActivity(intent);
+			}
 		}
 		return super.onOptionsItemSelected(item);
 	}
