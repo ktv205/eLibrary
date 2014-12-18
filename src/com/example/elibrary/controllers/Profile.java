@@ -19,7 +19,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 public class Profile extends Activity implements OnLogoutSuccessful {
 	private static final String TAG = "Profile";
@@ -28,6 +32,9 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 	private Menu menuGlobal;
 	private int auth;
 	private LayoutInflater mInflater;
+	private static int who;
+	private LinearLayout parentLinear;
+	private ScrollView parentScroll;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,16 +45,83 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				AppPreferences.Auth.AUTHPREF);
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		if (CheckConnection.isConnected(context)) {
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
+				initialize();
+				Intent intent = getIntent();
+				if (intent != null) {
+					if (intent
+							.hasExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE)) {
+						who = intent
+								.getExtras()
+								.getInt(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE);
+						fillBooks();
+					}
+
+				}
 			} else {
 				logout();
 			}
 		} else {
 			noConnectionView();
 		}
+	}
+
+	public void initialize() {
+		parentLinear = (LinearLayout) findViewById(R.id.profile_linear_parent);
+		parentScroll = (ScrollView) findViewById(R.id.profile_scrollview_parent);
+	}
+
+	@SuppressLint("InflateParams")
+	public void fillBooks() {
+		int rows = 0;
+		Button button = new Button(context);
+		if (who == AppPreferences.FRIEND) {
+			button.setText("friends");
+			parentLinear.addView(button);
+			rows = 2;
+		} else if (who == AppPreferences.STRANGER) {
+			button.setText("add friend");
+			parentLinear.addView(button);
+			rows = 2;
+		} else if (who == AppPreferences.SELF) {
+			rows = 3;
+		}
+		for (int i = 0; i < rows; i++) {
+			View singleCategory = mInflater.inflate(
+					R.layout.inflate_single_category, null, false);
+			TextView textView = (TextView) singleCategory
+					.findViewById(R.id.single_category_textview_book_category);
+			LinearLayout horizontal = (LinearLayout) singleCategory
+					.findViewById(R.id.single_category_linearlayout_horizontal);
+			textView.setText("category");
+			for (int j = 0; j < 20; j++) {
+				View singleBook = mInflater.inflate(
+						R.layout.inflate_singlebook, null, false);
+				ImageView imageView = (ImageView) singleBook
+						.findViewById(R.id.single_book_cover);
+				imageView.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						startActivity(new Intent(Profile.this, Book.class));
+
+					}
+				});
+				horizontal.addView(singleBook);
+			}
+			if (parentLinear != null) {
+				parentLinear.addView(singleCategory);
+
+			}
+		}
+		parentScroll.removeAllViews();
+		parentScroll.addView(parentLinear);
+		setContentView(parentScroll);
+
 	}
 
 	@Override
@@ -122,7 +196,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
 			auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
-			Log.d(TAG,"auth in logout->"+auth);
+			Log.d(TAG, "auth in logout->" + auth);
 			if (auth == AppPreferences.Auth.GOOGLE_AUTH) {
 				logout.logoutFromGoogle();
 			} else if (auth == AppPreferences.Auth.FACEBOOK_AUTH) {

@@ -88,7 +88,11 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				startActivity(new Intent(Friends.this, Profile.class));
+				Intent intent = new Intent(Friends.this, Profile.class);
+				intent.putExtra(
+						AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
+						AppPreferences.FRIEND);
+				startActivity(intent);
 
 			}
 		});
@@ -166,7 +170,12 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == R.id.name_account_menu) {
-			startActivity(new Intent(this, Profile.class));
+			Intent intent = new Intent(this, Profile.class);
+			intent.putExtra(
+					AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
+					AppPreferences.SELF);
+			startActivity(intent);
+			startActivity(intent);
 		} else if (id == R.id.settings_logout) {
 			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);

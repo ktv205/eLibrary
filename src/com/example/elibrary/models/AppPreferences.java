@@ -10,8 +10,11 @@ public class AppPreferences {
 	public static final String AUTH_KEY = "Auth_key";
 	public static int test = 0;
 	public static String ipAdd = "54.174.223.185";
-	public static final int BOOKSEARCH=7;
-	public static final int FRIENDSEARCH=8;
+	public static final int BOOKSEARCH = 7;
+	public static final int FRIENDSEARCH = 8;
+	public static final int FRIEND = 9;
+	public static final int STRANGER = 10;
+	public static final int SELF = 11;
 
 	public static abstract class Auth {
 		public static final String AUTHPREF = "AUTH_SHAREDPREFERENCES";
@@ -31,12 +34,12 @@ public class AppPreferences {
 		public static final String KEY_FACEBOOKID = "FACEBOOK_ID";
 		public static final String KEY_GOOGLEID = "GOOGLE_ID";
 		public static final String KEY_PARCELABLE_SIGNUP_VERIFICATION = "user_parcelable";
-		public static final String KEY_USERID="keyuserid";
-		public static final int ERROR_DATABASE=1;
-		public static final int ERROR_USER_DOESNT_EXIST=2;
-		public static final int ERROR_CONFORMATION_SENT=3;
-		public static final int ERROR_CONFORMATION_DONE=4;
-		public static final String KEY_PARCELABLE_SIGNIN_PASSWORDRETRIVAL="user_parcelable_signin_passwordretrival";
+		public static final String KEY_USERID = "keyuserid";
+		public static final int ERROR_DATABASE = 1;
+		public static final int ERROR_USER_DOESNT_EXIST = 2;
+		public static final int ERROR_CONFORMATION_SENT = 3;
+		public static final int ERROR_CONFORMATION_DONE = 4;
+		public static final String KEY_PARCELABLE_SIGNIN_PASSWORDRETRIVAL = "user_parcelable_signin_passwordretrival";
 	}
 
 	public static abstract class Codes {
@@ -45,7 +48,8 @@ public class AppPreferences {
 
 	public static abstract class PutExtraKeys {
 		public static final String PUTEXTRA_USERID = "putextrakey";
-		public static final String PUTEXTRA_SEARCHTYPE="searchtype";
+		public static final String PUTEXTRA_SEARCHTYPE = "searchtype";
+		public static final String PUTEXTRA_WHO_PROFILE = "whoes profile";
 	}
 
 }

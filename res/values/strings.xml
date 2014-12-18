@@ -38,6 +38,11 @@
     <string name="string_no_network">No Network Connection</string>
     <string name="string_reload">reload</string>
     <string name="string_addto_favourites">add to favourites</string>
+    <string name="string_profile_picture">profile picture</string>
+    <string name="string_name">Name</string>
+    <string name="string_email">email</string>
+    <string name="string_uploaded">books uploaded</string>
+    <string name="string_library">My Library</string>
     <string-array name="string_books_category">
         <item>biography</item>
     </string-array>

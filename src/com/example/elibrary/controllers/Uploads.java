@@ -156,7 +156,12 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		} else if (id == R.id.settings_library) {
 			startActivity(new Intent(this, MainActivity.class));
 		} else if (id == R.id.name_account_menu) {
-			startActivity(new Intent(this, Profile.class));
+			Intent intent = new Intent(this, Profile.class);
+			intent.putExtra(
+					AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
+					AppPreferences.SELF);
+			startActivity(intent);
+			startActivity(intent);
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
 		}

@@ -3,6 +3,7 @@ package com.example.elibrary.controllers;
 import com.example.elibrary.R;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -136,7 +137,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			} else {
 				logout();
 			}
-		}else{
+		} else {
 			noConnectionView();
 		}
 
@@ -181,7 +182,10 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == R.id.name_account_menu) {
-			startActivity(new Intent(this, Profile.class));
+			Intent intent = new Intent(this, Profile.class);
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
+					AppPreferences.SELF);
+			startActivity(intent);
 		} else if (id == R.id.settings_logout) {
 			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
