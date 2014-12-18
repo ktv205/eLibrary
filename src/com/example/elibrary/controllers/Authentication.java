@@ -5,6 +5,8 @@ import com.example.elibrary.controllers.AuthenticationFragment.OnClickAuthentica
 import com.example.elibrary.controllers.EmailFragment.OnClickEmailSignup;
 import com.example.elibrary.models.AppPreferences;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,6 +14,10 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 
 //import android.widget.LinearLayout;
 
@@ -21,6 +27,8 @@ public class Authentication extends FragmentActivity implements
 	private FragmentManager fragmentManager;
 	private FragmentTransaction fragmentTransaction;
 	private static final String TAG = "Authentication";
+	private Context context;
+	private LayoutInflater mInflater;
 
 	// private LinearLayout authLinear;
 	@Override
@@ -29,13 +37,18 @@ public class Authentication extends FragmentActivity implements
 		setContentView(R.layout.activity_authentication);
 		// authLinear=(LinearLayout)findViewById(R.id.linear_authentication);
 		Log.d(TAG, "in onCreate");
-		fragmentManager = getSupportFragmentManager();
-		fragmentTransaction = fragmentManager.beginTransaction();
-		AuthenticationFragment fragment = new AuthenticationFragment();
-		fragmentTransaction.add(R.id.linear_authentication, fragment,
-				AppPreferences.AUTH_TAG);
-		fragmentTransaction.commit();
-		fragmentFlag = 1;
+		context = getApplicationContext();
+		mInflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		if (CheckConnection.isConnected(context)) {
+			fragmentManager = getSupportFragmentManager();
+			fragmentTransaction = fragmentManager.beginTransaction();
+			AuthenticationFragment fragment = new AuthenticationFragment();
+			fragmentTransaction.add(R.id.linear_authentication, fragment,
+					AppPreferences.AUTH_TAG);
+			fragmentTransaction.commit();
+			fragmentFlag = 1;
+		}
 	}
 
 	@Override
@@ -76,14 +89,35 @@ public class Authentication extends FragmentActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.d(TAG,"onResume"+fragmentFlag);
-		 if(new CheckAuthentication().checkForAuthentication(this)){
-		   //startActivity(new Intent(this,MainActivity.class));
-			 fragmentFlag=1;
-			 onBackPressed();
-		   
-		 }
-		
+		Log.d(TAG, "onResume" + fragmentFlag);
+		if (CheckConnection.isConnected(context)) {
+			if (CheckAuthentication.checkForAuthentication(context)) {
+				startActivity(new Intent(this, MainActivity.class));
+				fragmentFlag = 1;
+				onBackPressed();
+			}
+		} else {
+			noConnectionView();
+		}
+
+	}
+
+	@SuppressLint("InflateParams")
+	public void noConnectionView() {
+		View view = mInflater.inflate(R.layout.inflate_noconnection, null,
+				false);
+		setContentView(view);
+		Button reload = (Button) view
+				.findViewById(R.id.noconntection_button_reload);
+		reload.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Authentication.this,
+						MainActivity.class));
+				finish();
+			}
+		});
 	}
 
 	@Override
@@ -113,17 +147,21 @@ public class Authentication extends FragmentActivity implements
 		}
 		super.onActivityResult(REQUEST_CODE, RESPONSE_CODE, data);
 	}
+
 	@Override
 	public void onBackPressed() {
-		Log.d(TAG,"onBackPressed->"+fragmentFlag);
-		if(fragmentFlag==0 || fragmentFlag==1){
+		Log.d(TAG, "onBackPressed->" + fragmentFlag);
+		if (fragmentFlag == 0 || fragmentFlag == 1) {
 			super.onBackPressed();
-		}else if(fragmentFlag==2){
+		} else if (fragmentFlag == 2) {
 			fragmentManager = getSupportFragmentManager();
 			fragmentTransaction = fragmentManager.beginTransaction();
-			FacebookFragment fb = (FacebookFragment) getSupportFragmentManager().findFragmentByTag(AppPreferences.FB_TAG);
-			GoogleFragment g = (GoogleFragment) getSupportFragmentManager().findFragmentByTag(AppPreferences.G_TAG);
-			EmailFragment emailFragment = (EmailFragment) getSupportFragmentManager().findFragmentByTag(AppPreferences.EMAIL_TAG);
+			FacebookFragment fb = (FacebookFragment) getSupportFragmentManager()
+					.findFragmentByTag(AppPreferences.FB_TAG);
+			GoogleFragment g = (GoogleFragment) getSupportFragmentManager()
+					.findFragmentByTag(AppPreferences.G_TAG);
+			EmailFragment emailFragment = (EmailFragment) getSupportFragmentManager()
+					.findFragmentByTag(AppPreferences.EMAIL_TAG);
 			fragmentTransaction.remove(fb);
 			fragmentTransaction.remove(g);
 			fragmentTransaction.remove(emailFragment);
@@ -131,9 +169,9 @@ public class Authentication extends FragmentActivity implements
 			fragmentTransaction.add(R.id.linear_authentication, fragment,
 					AppPreferences.AUTH_TAG);
 			fragmentTransaction.commit();
-			fragmentFlag=1;
-			
+			fragmentFlag = 1;
+
 		}
-		
+
 	}
 }

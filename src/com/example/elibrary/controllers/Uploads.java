@@ -1,15 +1,7 @@
 package com.example.elibrary.controllers;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.elibrary.R;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
@@ -18,18 +10,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.provider.MediaStore.Files;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,6 +35,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 	private Context context;
 	private Button uploadButton, submitButton;
 	private TextView fileNameTextview;
+	private LayoutInflater mInflater;
 	private static final int PICK_FILE_REQUEST = 1;
 
 	@Override
@@ -54,25 +43,34 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_uploads);
 		context = getApplicationContext();
-		authPref = getSharedPreferences(this, AppPreferences.Auth.AUTHPREF);
-		if (isConntected()) {
+		authPref = MySharedPreferences.getSharedPreferences(context,
+				AppPreferences.Auth.AUTHPREF);
+		mInflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		if (CheckConnection.isConnected(context)) {
 			Log.d(TAG, "internet connected");
-			initialize();
+			if (CheckAuthentication.checkForAuthentication(context)) {
+				initialize();
+			} else {
+				logout();
+			}
+
 		} else {
-			TextView text = new TextView(this);
-			text.setText("Not connected to a network!");
-			setContentView(text);
+
 		}
 	}
+
 	@Override
-    public void startActivity(Intent intent) {
-    	Log.d(TAG, "in onStartActivity");
-		if(Intent.ACTION_SEARCH.equals(intent.getAction())){
-			Log.d(TAG,"intent.getAction");
-			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE, AppPreferences.BOOKSEARCH);
+	public void startActivity(Intent intent) {
+		Log.d(TAG, "in onStartActivity");
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			Log.d(TAG, "intent.getAction");
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE,
+					AppPreferences.BOOKSEARCH);
 		}
 		super.startActivity(intent);
-    }
+	}
+
 	public void initialize() {
 		uploadButton = (Button) findViewById(R.id.uploads_button_uplaod);
 		submitButton = (Button) findViewById(R.id.uploads_button_submit);
@@ -81,22 +79,37 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		submitButton.setOnClickListener(this);
 	}
 
-	public SharedPreferences getSharedPreferences(Context context, String name) {
-		Log.d(TAG, "getSharedPreferences method");
-		return context.getSharedPreferences(name, Context.MODE_PRIVATE);
-	}
-
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (isConntected()) {
-			Log.d(TAG, "internet connected");
-			checkForAuthentication();
+		Log.d(TAG, "onResume");
+		if (CheckConnection.isConnected(context)) {
+			if (CheckAuthentication.checkForAuthentication(context)) {
+				setMenuName();
+			} else {
+				logout();
+			}
 		} else {
-			TextView text = new TextView(this);
-			text.setText("Not connected to a network!");
-			setContentView(text);
+			noConnectionView();
 		}
+
+	}
+
+	@SuppressLint("InflateParams")
+	public void noConnectionView() {
+		View view = mInflater.inflate(R.layout.inflate_noconnection, null,
+				false);
+		setContentView(view);
+		Button reload = (Button) view
+				.findViewById(R.id.noconntection_button_reload);
+		reload.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Uploads.this, Uploads.class));
+				finish();
+			}
+		});
 	}
 
 	public boolean isConntected() {
@@ -132,7 +145,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		if (id == R.id.settings_logout) {
 			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
-			auth = authPref.getInt(AppPreferences.AUTH_KEY, -1);
+			auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
 			if (auth == AppPreferences.Auth.GOOGLE_AUTH) {
 				logout.logoutFromGoogle();
 			} else if (auth == AppPreferences.Auth.FACEBOOK_AUTH) {
@@ -159,21 +172,16 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		}
 	}
 
-	public void checkForAuthentication() {
-		if (new CheckAuthentication().checkForAuthentication(context)) {
-			Log.d(TAG, "in checkForAuthentication and it is true");
-			setMenuName();
-		} else {
-			Intent intent = new Intent(this, Authentication.class);
-			startActivity(intent);
-			finish();
-		}
+	public void logout() {
+		Intent intent = new Intent(this, Authentication.class);
+		startActivity(intent);
+		finish();
 	}
 
 	@Override
 	public void onCleardFields(boolean cleared) {
 		if (cleared) {
-			checkForAuthentication();
+			logout();
 		}
 
 	}
@@ -200,27 +208,12 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			if (resultCode == RESULT_OK) {
 				Log.d(TAG, "URI->" + data.getData().getPath());
 				Log.d(TAG, "URI->" + data.getDataString());
-				File file=new File(data.getData().getPath());
-				if(file.exists()){
-					Log.d(TAG,"file exists");
-				}else{
-					Log.d(TAG,"file does not exists");
+				File file = new File(data.getData().getPath());
+				if (file.exists()) {
+					Log.d(TAG, "file exists");
+				} else {
+					Log.d(TAG, "file does not exists");
 				}
-				// Cursor contentCursor = getContentResolver().query(
-				// data.getData(), null, null, null, null);
-				// Log.d(TAG, "column count->" +
-				// contentCursor.getColumnCount());
-				//
-				// for (int i = 0; i < contentCursor.getColumnCount(); i++) {
-				// Log.d(TAG, contentCursor.getColumnName(i));
-				// }
-				// contentCursor.moveToFirst();
-				// String documentId = contentCursor.getString(contentCursor
-				// .getColumnIndex("document_id"));
-				// Log.d(TAG, documentId + "");
-				// final File file = new File("/storage/emulated/0/Download/"
-				// + contentCursor.getString(contentCursor
-				// .getColumnIndex("_display_name")));
 				Thread thread = new Thread(new Runnable() {
 
 					@Override

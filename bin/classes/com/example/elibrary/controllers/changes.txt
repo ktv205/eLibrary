@@ -1,0 +1,7 @@
+// String name = authPref.getString(AppPreferences.Auth.KEY_NAME,
+			// "name");
+			// String email = authPref.getString(AppPreferences.Auth.KEY_EMAIL,
+			// "email");
+			// int auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
+			// Log.d(TAG, "name->" + name + "email->" + email + "auth->" +
+			// auth);

@@ -3,7 +3,7 @@ package com.example.elibrary.controllers;
 import com.example.elibrary.R;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -11,8 +11,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.SearchView;
@@ -22,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -41,37 +40,54 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		Log.d(TAG, "onCreate");
 		context = getApplicationContext();
-		authPref = getSharedPreferences(context, AppPreferences.Auth.AUTHPREF);
-		String name = authPref.getString(AppPreferences.Auth.KEY_NAME, "name");
-		String email = authPref.getString(AppPreferences.Auth.KEY_EMAIL,
-				"email");
-		int auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
-		Log.d(TAG, "name->" + name + "email->" + email + "auth->" + auth);
-
+		authPref = MySharedPreferences.getSharedPreferences(context,
+				AppPreferences.Auth.AUTHPREF);
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		parentLinear = new LinearLayout(this);
-		parentLinear.setOrientation(LinearLayout.VERTICAL);
-		scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
-		Log.d(TAG, "onCreate");
-		if (isConntected()) {
+		if (CheckConnection.isConnected(context)) {
 			Log.d(TAG, "internet connected");
-			if (checkForAuthentication()) {
+			parentLinear = new LinearLayout(this);
+			parentLinear.setOrientation(LinearLayout.VERTICAL);
+			scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
+
+			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
 				fetchData();
 				fillWithBooks();
 			} else {
-
+				logout();
 			}
+		} else {
+			noConnectionView();
+
 		}
 
+	}
+
+	@SuppressLint("InflateParams")
+	public void noConnectionView() {
+		View view = mInflater.inflate(R.layout.inflate_noconnection, null,
+				false);
+		setContentView(view);
+		Button reload = (Button) view
+				.findViewById(R.id.noconntection_button_reload);
+		reload.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, MainActivity.class));
+				finish();
+			}
+		});
 	}
 
 	public void fetchData() {
 
 	}
 
+	@SuppressLint("InflateParams")
 	public void fillWithBooks() {
 		Log.d(TAG, "fillWithBooks");
 		for (int i = 0; i < 10; i++) {
@@ -112,41 +128,18 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	protected void onResume() {
 		super.onResume();
 		Log.d(TAG, "onResume");
-		if (checkForAuthentication()) {
-			setMenuName();
-			// fetchData();
-			// fillWithBooks();
-		} else {
-			logout();
+		if (CheckConnection.isConnected(context)) {
+			if (CheckAuthentication.checkForAuthentication(context)) {
+				setMenuName();
+				// fetchData();
+				// fillWithBooks();
+			} else {
+				logout();
+			}
+		}else{
+			noConnectionView();
 		}
 
-	}
-
-	public SharedPreferences getSharedPreferences(Context context, String name) {
-		Log.d(TAG, "getSharedPreferences method");
-		return context.getSharedPreferences(name, Context.MODE_PRIVATE);
-	}
-
-	public boolean isConntected() {
-		Log.d(TAG, "isConnected method");
-		ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo info = manager.getActiveNetworkInfo();
-		if (info != null && info.isConnected()) {
-			return true;
-		} else {
-			return false;
-		}
-
-	}
-
-	public boolean checkForAuthentication() {
-		if (new CheckAuthentication().checkForAuthentication(context)) {
-			Log.d(TAG, "in checkForAuthentication and it is true");
-			return true;
-
-		} else {
-			return false;
-		}
 	}
 
 	public void setMenuName() {
@@ -176,9 +169,10 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	@Override
 	public void startActivity(Intent intent) {
 		Log.d(TAG, "in onStartActivity");
-		if(Intent.ACTION_SEARCH.equals(intent.getAction())){
-			Log.d(TAG,"intent.getAction");
-			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE, AppPreferences.BOOKSEARCH);
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			Log.d(TAG, "intent.getAction");
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE,
+					AppPreferences.BOOKSEARCH);
 		}
 		super.startActivity(intent);
 	}
@@ -214,7 +208,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	@Override
 	public void onCleardFields(boolean cleared) {
 		if (cleared) {
-			if (checkForAuthentication()) {
+			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
 				// fetchData();
 				// fillWithBooks();

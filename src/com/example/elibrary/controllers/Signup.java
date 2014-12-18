@@ -5,9 +5,13 @@ import com.example.elibrary.models.AppPreferences;
 import com.example.elibrary.models.RequestParams;
 import com.example.elibrary.models.UserModel;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -26,12 +30,28 @@ public class Signup extends Activity implements OnClickListener {
 	private final static int RETYPE_EMPTY = 3;
 	private final static int DONT_MATCH = 4;
 	private final static int RESULT_OK = 5;
+	private Context context;
+	private LayoutInflater mInflater;
+	private static final String TAG = "Signup";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_signup);
-		initialize();
+		context = getApplicationContext();
+		mInflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		if (CheckConnection.isConnected(context)) {
+			Log.d(TAG, "internet connected");
+			if (CheckAuthentication.checkForAuthentication(context)) {
+
+			} else {
+				initialize();
+			}
+
+		} else {
+			noConnectionView();
+		}
 	}
 
 	public void initialize() {
@@ -44,14 +64,39 @@ public class Signup extends Activity implements OnClickListener {
 
 	}
 
+	@SuppressLint("InflateParams")
+	public void noConnectionView() {
+		View view = mInflater.inflate(R.layout.inflate_noconnection, null,
+				false);
+		setContentView(view);
+		Button reload = (Button) view
+				.findViewById(R.id.noconntection_button_reload);
+		reload.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Signup.this, Signup.class));
+				finish();
+			}
+		});
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// if(new CheckAuthentication().checkForAuthentication(this)){
-		// startActivity(new Intent(this,MainActivity.class));
-		// finish();
-		// }
-    }
+		if (CheckConnection.isConnected(context)) {
+			Log.d(TAG, "internet connected");
+			if (CheckAuthentication.checkForAuthentication(context)) {
+
+			} else {
+
+			}
+
+		} else {
+			noConnectionView();
+		}
+
+	}
 
 	@Override
 	public void onClick(View v) {
@@ -76,22 +121,24 @@ public class Signup extends Activity implements OnClickListener {
 			} else {
 				message = "everything looks good";
 				createUserModel();
-				RequestParams params=setParams();
-				new AuthAsyncTask(user,this).execute(params);
+				RequestParams params = setParams();
+				new AuthAsyncTask(user, this).execute(params);
 			}
 			Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 		}
 
 	}
-	public RequestParams setParams(){
-		RequestParams params=new RequestParams();
-		params.setURI("http://"+AppPreferences.ipAdd+"/eLibrary/lib/includes/register.inc.php");
+
+	public RequestParams setParams() {
+		RequestParams params = new RequestParams();
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/lib/includes/register.inc.php");
 		params.setMethod("POST");
 		params.setParam("user_name", user.getName());
 		params.setParam("user_email", user.getEmail());
-		params.setParam("p",user.getPassword());
+		params.setParam("p", user.getPassword());
 		params.setParam("usre_auth", user.getAuth());
-		params.setParam("mobile","1");
+		params.setParam("mobile", "1");
 		return params;
 
 	}
@@ -115,7 +162,7 @@ public class Signup extends Activity implements OnClickListener {
 			return RESULT_OK;
 		}
 	}
-    
+
 	public void createUserModel() {
 		user = new UserModel();
 		user.setName(name);
@@ -123,8 +170,5 @@ public class Signup extends Activity implements OnClickListener {
 		user.setPassword(password);
 		user.setAuth(AppPreferences.Auth.EMAIL_ENUM);
 	}
-
-	
-
 
 }

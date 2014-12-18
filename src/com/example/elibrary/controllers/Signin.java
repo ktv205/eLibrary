@@ -8,12 +8,15 @@ import com.example.elibrary.models.AppPreferences;
 import com.example.elibrary.models.RequestParams;
 import com.example.elibrary.models.UserModel;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -33,13 +36,31 @@ public class Signin extends Activity implements OnClickListener {
 	private static final String TAG = "Signin";
 	private SharedPreferences authPref;
 	private SharedPreferences.Editor edit;
+	private Context context;
+	private LayoutInflater mInflater;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(TAG, "onCreate");
 		setContentView(R.layout.activity_signin);
-		initialize();
+		Log.d(TAG, "onCreate");
+		context = getApplicationContext();
+		authPref = MySharedPreferences.getSharedPreferences(context,
+				AppPreferences.Auth.AUTHPREF);
+		mInflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		if (CheckConnection.isConnected(context)) {
+			Log.d(TAG, "internet connected");
+			if (CheckAuthentication.checkForAuthentication(context)) {
+
+			} else {
+				initialize();
+			}
+
+		} else {
+			noConnectionView();
+		}
+
 	}
 
 	public void initialize() {
@@ -51,6 +72,23 @@ public class Signin extends Activity implements OnClickListener {
 		submit.setOnClickListener(this);
 		forgot_textview.setOnClickListener(this);
 
+	}
+
+	@SuppressLint("InflateParams")
+	public void noConnectionView() {
+		View view = mInflater.inflate(R.layout.inflate_noconnection, null,
+				false);
+		setContentView(view);
+		Button reload = (Button) view
+				.findViewById(R.id.noconntection_button_reload);
+		reload.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(Signin.this, Signin.class));
+				finish();
+			}
+		});
 	}
 
 	@Override
@@ -108,10 +146,17 @@ public class Signin extends Activity implements OnClickListener {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// if(new CheckAuthentication().checkForAuthentication(this)){
-		// startActivity(new Intent(this,MainActivity.class));
-		// finish();
-		// }
+		if (CheckConnection.isConnected(context)) {
+			Log.d(TAG, "internet connected");
+			if (CheckAuthentication.checkForAuthentication(context)) {
+
+			} else {
+				
+			}
+
+		} else {
+			noConnectionView();
+		}
 	}
 
 	public void createUserModel() {
@@ -167,8 +212,6 @@ public class Signin extends Activity implements OnClickListener {
 
 	public void setSharedPreferences() {
 		Log.d(TAG, "setSharedPreferences");
-		authPref = getSharedPreferences(AppPreferences.Auth.AUTHPREF,
-				MODE_PRIVATE);
 		edit = authPref.edit();
 		Log.d(TAG, "Name in signIn->" + user.getName());
 		edit.putString(AppPreferences.Auth.KEY_NAME, user.getName());

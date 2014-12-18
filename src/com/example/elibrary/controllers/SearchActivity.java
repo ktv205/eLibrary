@@ -9,11 +9,12 @@ import java.util.ArrayList;
 import javax.net.ssl.HttpsURLConnection;
 
 import com.example.elibrary.R;
-import com.example.elibrary.R.id;
+import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
 import com.example.elibrary.models.RequestParams;
 import com.example.elibrary.models.ToBeFriendsModel;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
@@ -30,13 +31,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
-public class SearchActivity extends Activity {
+public class SearchActivity extends Activity implements OnLogoutSuccessful {
 	private static final String TAG = "SearchActivity";
 	private TextView queryWord;
 	private ListView toBeFriendsListview;
@@ -46,13 +49,34 @@ public class SearchActivity extends Activity {
 	private Context context;
 	private Menu menuGlobal;
 	private int auth;
+	private LayoutInflater mInflater;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_search);
-		initialize();
-		handleIntent(getIntent());
+		Log.d(TAG, "onCreate");
+		context = getApplicationContext();
+		authPref = MySharedPreferences.getSharedPreferences(context,
+				AppPreferences.Auth.AUTHPREF);
+		mInflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		if (CheckConnection.isConnected(context)) {
+			Log.d(TAG, "internet connected");
+			if (CheckAuthentication.checkForAuthentication(context)) {
+				initialize();
+				handleIntent(getIntent());
+				trainingSet();
+			} else {
+				logout();
+			}
+		} else {
+			noConnectionView();
+		}
+
+	}
+
+	public void trainingSet() {
 		ToBeFriendsModel obj = new ToBeFriendsModel();
 		obj.setEmail("example@example.com");
 		obj.setName("example");
@@ -61,14 +85,24 @@ public class SearchActivity extends Activity {
 		toBeFriendsList.add(obj);
 		ToBeFriendsAdapter adapter = new ToBeFriendsAdapter(toBeFriendsList);
 		toBeFriendsListview.setAdapter(adapter);
-		context = getApplicationContext();
-		authPref = getSharedPreferences(context, AppPreferences.Auth.AUTHPREF);
-
 	}
 
-	public SharedPreferences getSharedPreferences(Context context, String name) {
-		Log.d(TAG, "getSharedPreferences method");
-		return context.getSharedPreferences(name, Context.MODE_PRIVATE);
+	@SuppressLint("InflateParams")
+	public void noConnectionView() {
+		View view = mInflater.inflate(R.layout.inflate_noconnection, null,
+				false);
+		setContentView(view);
+		Button reload = (Button) view
+				.findViewById(R.id.noconntection_button_reload);
+		reload.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(SearchActivity.this,
+						SearchActivity.class));
+				finish();
+			}
+		});
 	}
 
 	@Override
@@ -84,7 +118,7 @@ public class SearchActivity extends Activity {
 
 	public void initialize() {
 		queryWord = (TextView) findViewById(R.id.search_textview_word);
-		toBeFriendsListview = (ListView) findViewById(R.id.search_listview_friends);
+		toBeFriendsListview = (ListView) findViewById(R.id.search_listview_generic);
 	}
 
 	@Override
@@ -124,6 +158,12 @@ public class SearchActivity extends Activity {
 			item.setTitle(authPref.getString(AppPreferences.Auth.KEY_NAME,
 					"Name"));
 		}
+	}
+
+	public void logout() {
+		Intent intent = new Intent(this, Authentication.class);
+		startActivity(intent);
+		finish();
 	}
 
 	@Override
@@ -309,6 +349,14 @@ public class SearchActivity extends Activity {
 			protected void onPostExecute(Bitmap result) {
 				holder.profilePic.setImageBitmap(result);
 			}
+		}
+
+	}
+
+	@Override
+	public void onCleardFields(boolean cleared) {
+		if (cleared) {
+			logout();
 		}
 
 	}

@@ -10,7 +10,7 @@
         android:layout_weight="1"
         android:text="text"/>
     <ListView 
-        android:id="@+id/search_listview_friends"
+        android:id="@+id/search_listview_generic"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="15"></ListView>

@@ -35,6 +35,9 @@
     <string name="string_label_search_activity">Search Friends</string>
     <string name="string_label_friends">Friends</string>
     <string name="string_book_title">book title</string>
+    <string name="string_no_network">No Network Connection</string>
+    <string name="string_reload">reload</string>
+    <string name="string_addto_favourites">add to favourites</string>
     <string-array name="string_books_category">
         <item>biography</item>
     </string-array>
