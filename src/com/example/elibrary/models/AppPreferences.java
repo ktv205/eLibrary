@@ -15,6 +15,7 @@ public class AppPreferences {
 	public static final int FRIEND = 9;
 	public static final int STRANGER = 10;
 	public static final int SELF = 11;
+	public static final int PROFILE=12;
 
 	public static abstract class Auth {
 		public static final String AUTHPREF = "AUTH_SHAREDPREFERENCES";

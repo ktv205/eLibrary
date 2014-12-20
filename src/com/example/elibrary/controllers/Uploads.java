@@ -1,21 +1,33 @@
 package com.example.elibrary.controllers;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.elibrary.R;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,8 +35,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Uploads extends Activity implements OnLogoutSuccessful,
 		OnClickListener {
@@ -37,6 +52,8 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 	private TextView fileNameTextview;
 	private LayoutInflater mInflater;
 	private static final int PICK_FILE_REQUEST = 1;
+	private LinearLayout parentLinear;
+	private String filePath,fileName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +64,12 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				AppPreferences.Auth.AUTHPREF);
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		if (CheckConnection.isConnected(context)) {
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				initialize();
+				fillBooks();
 			} else {
 				logout();
 			}
@@ -75,8 +94,40 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		uploadButton = (Button) findViewById(R.id.uploads_button_uplaod);
 		submitButton = (Button) findViewById(R.id.uploads_button_submit);
 		fileNameTextview = (TextView) findViewById(R.id.uploads_textview_filename);
+		parentLinear = (LinearLayout) findViewById(R.id.uploads_linear_parent);
+		fileNameTextview.setText("");
 		uploadButton.setOnClickListener(this);
 		submitButton.setOnClickListener(this);
+	}
+
+	public void fillBooks() {
+		View singleCategory = mInflater.inflate(
+				R.layout.inflate_single_category, null, false);
+		TextView textView = (TextView) singleCategory
+				.findViewById(R.id.single_category_textview_book_category);
+		LinearLayout horizontal = (LinearLayout) singleCategory
+				.findViewById(R.id.single_category_linearlayout_horizontal);
+		textView.setText("category");
+		for (int j = 0; j < 20; j++) {
+			View singleBook = mInflater.inflate(R.layout.inflate_singlebook,
+					null, false);
+			ImageView imageView = (ImageView) singleBook
+					.findViewById(R.id.single_book_cover);
+			imageView.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					startActivity(new Intent(Uploads.this, Book.class));
+
+				}
+			});
+			horizontal.addView(singleBook);
+		}
+		if (parentLinear != null) {
+			parentLinear.addView(singleCategory);
+
+		}
+		setContentView(parentLinear);
 	}
 
 	@Override
@@ -157,8 +208,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			startActivity(new Intent(this, MainActivity.class));
 		} else if (id == R.id.name_account_menu) {
 			Intent intent = new Intent(this, Profile.class);
-			intent.putExtra(
-					AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
 					AppPreferences.SELF);
 			startActivity(intent);
 			startActivity(intent);
@@ -196,6 +246,13 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		int id = v.getId();
 		if (id == uploadButton.getId()) {
 			getFile();
+		}else if(id==submitButton.getId()){
+			if(fileNameTextview.getText().toString().equals("")){
+				Toast.makeText(this, "select a book using upload button", Toast.LENGTH_LONG).show();
+			}else{
+				new BookUploadAsyncTask().execute(new String[] { filePath,
+						fileName });
+			}
 		}
 
 	}
@@ -213,22 +270,140 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			if (resultCode == RESULT_OK) {
 				Log.d(TAG, "URI->" + data.getData().getPath());
 				Log.d(TAG, "URI->" + data.getDataString());
-				File file = new File(data.getData().getPath());
-				if (file.exists()) {
-					Log.d(TAG, "file exists");
-				} else {
-					Log.d(TAG, "file does not exists");
+				String pathToFile = null;
+				Cursor cursor = getContentResolver().query(data.getData(),
+						null, null, null, null);
+				Log.d(TAG, "get column count=>" + cursor.getColumnCount());
+				for (int i = 0; i < cursor.getColumnCount(); i++) {
+					Log.d(TAG, cursor.getColumnName(i));
 				}
-				Thread thread = new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-
-					}
-				});
-				thread.start();
+				cursor.moveToFirst();
+				final String name = cursor.getString(cursor
+						.getColumnIndex("_display_name"));
+				if (makeDirectory()) {
+					Log.d(TAG, "make directory succesful and returned true");
+					pathToFile = makeFile(name, data);
+					Log.d(TAG, "path to file is" + pathToFile);
+				}
+				fileNameTextview.setText(name);
+				filePath = pathToFile;
+				fileName=name;
+				
+				// Thread thread = new Thread(new Runnable() {
+				//
+				// @Override
+				// public void run() {
+				// final AmazonS3Client client = new AmazonS3Client(
+				// new BasicAWSCredentials("AKIAI56LEYR7PFQX3SRA",
+				// "3A71+q84uEoyqnBG51DZwdkBulP57jvi1GCZbjlS"));
+				// final File filetoupload = new File(filePath);
+				// PutObjectRequest por = new PutObjectRequest(
+				// "songbirdsongs", name, filetoupload);
+				// client.putObject(por);
+				// }
+				// });
+				// thread.start();
 
 			}
+		}
+	}
+
+	public boolean makeDirectory() {
+		if (new File(Environment.getExternalStorageDirectory() + "/elibrary")
+				.exists()) {
+			Log.d(TAG, "Directory elibrary  exist");
+			return true;
+		} else {
+			Log.d(TAG, "Directory elibrary does not exist");
+			boolean created = new File(
+					Environment.getExternalStorageDirectory(), "elibrary")
+					.mkdirs();
+			if (created) {
+				return true;
+
+			} else {
+				Log.d(TAG, "directory not created");
+				return false;
+
+			}
+
+		}
+	}
+
+	public String makeFile(String name, Intent intent) {
+		String PathToDir = Environment.getExternalStorageDirectory()
+				.getAbsolutePath() + "/" + "elibrary";
+
+		InputStream in = null;
+		try {
+			in = getContentResolver().openInputStream(intent.getData());
+			if (in == null) {
+				Log.d(TAG, "in is null");
+			} else {
+				Log.d(TAG, "in is not null");
+			}
+		} catch (FileNotFoundException e) {
+			Log.d(TAG, "input Stream not found");
+			e.printStackTrace();
+		}
+		OutputStream out = null;
+		try {
+			out = new FileOutputStream(PathToDir + "/" + name);
+		} catch (FileNotFoundException e) {
+			Log.d(TAG, "file output stream not found");
+			e.printStackTrace();
+		}
+		byte[] data = new byte[1024];
+		int count;
+		try {
+			while ((count = in.read(data)) != -1) {
+				out.write(data, 0, count);
+			}
+		} catch (IOException e) {
+			Log.d(TAG, "writing not done into the file");
+			e.printStackTrace();
+		}
+		try {
+			if (out == null) {
+				Log.d(TAG, "out is null");
+			} else {
+				Log.d(TAG, "out is not null");
+			}
+			out.flush();
+			out.close();
+			in.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return PathToDir + "/" + name;
+
+	}
+
+	public class BookUploadAsyncTask extends AsyncTask<String[], Void, Void> {
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			dialog = new ProgressDialog(Uploads.this);
+			dialog.show();
+		}
+
+		@Override
+		protected Void doInBackground(String[]... params) {
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			dialog.dismiss();
+			Toast.makeText(Uploads.this, "UploadComplete", Toast.LENGTH_LONG)
+					.show();
+			fileNameTextview.setText("");
+			fileName=null;
+			filePath=null;
 		}
 	}
 }

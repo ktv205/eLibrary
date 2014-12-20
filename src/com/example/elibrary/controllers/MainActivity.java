@@ -1,8 +1,16 @@
 package com.example.elibrary.controllers;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import com.example.elibrary.R;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
+import com.example.elibrary.models.RequestParams;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -205,6 +213,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			startActivity(new Intent(this, Uploads.class));
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
+		} else if (id == R.id.setting_test) {
+			new TestAsyncTask().execute(getParams());
+            
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -229,10 +240,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		finish();
 	}
 
-	public void setParams() {
-
-	}
-
 	public class FetchBooksAsyncTask extends AsyncTask<Void, Void, Void> {
 		ProgressDialog dialog;
 
@@ -250,6 +257,79 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		@Override
 		protected void onPostExecute(Void result) {
 			dialog.dismiss();
+		}
+
+	}
+
+	public RequestParams getParams() {
+		Log.d(TAG, "getParams()");
+		RequestParams params = new RequestParams();
+		params.setMethod("GET");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/lib/controllers/profile.php");
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_PERSON_ID, -1)));
+		Log.d(TAG,
+				"user_id->"
+						+ authPref
+								.getInt(AppPreferences.Auth.KEY_PERSON_ID, -1));
+		return params;
+	}
+
+	public class TestAsyncTask extends AsyncTask<RequestParams, Void, String> {
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(RequestParams... params) {
+			URL url = null;
+			try {
+				url = new URL(params[0].getURI() + "?"
+						+ params[0].getEncodedParams());
+				Log.d(TAG, "In background->" + params[0].getURI() + "?"
+						+ params[0].getEncodedParams());
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+			HttpURLConnection con = null;
+			try {
+				con = (HttpURLConnection) url.openConnection();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			StringBuilder builder = new StringBuilder();
+			String line = null;
+			InputStreamReader reader = null;
+			try {
+				reader = new InputStreamReader(con.getInputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			BufferedReader buffer = null;
+			buffer = new BufferedReader(reader);
+			try {
+				line = buffer.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			while (line != null) {
+				builder.append(line);
+				try {
+					line = buffer.readLine();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			Log.d(TAG, "builder->" + builder.toString());
+			return builder.toString();
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			Log.d(TAG, "onPostExecute->" + result);
 		}
 
 	}

@@ -43,6 +43,7 @@
     <string name="string_email">email</string>
     <string name="string_uploaded">books uploaded</string>
     <string name="string_library">My Library</string>
+    <string name="string_test">test response</string>
     <string-array name="string_books_category">
         <item>biography</item>
     </string-array>

@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,10 +21,16 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 	private final static String TAG = "AuthAsyncTask";
 	UserModel user;
 	Context context;
+	private SharedPreferences authPref;
+	private SharedPreferences.Editor edit;
 
 	public AuthAsyncTask(UserModel user, Context context) {
 		this.user = user;
 		this.context = context;
+		authPref = MySharedPreferences.getSharedPreferences(context,
+				AppPreferences.Auth.AUTHPREF);
+		edit = authPref.edit();
+
 	}
 
 	@Override
@@ -68,6 +75,7 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 		} else {
 			Toast.makeText(context, "successfully signed up",
 					Toast.LENGTH_SHORT).show();
+
 			intent = new Intent(context, MainActivity.class);
 			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_USERID,
 					user_id);
@@ -92,6 +100,8 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 			if (obj.getInt("success") == 1) {
 				user_id = obj.getInt("user_id");
 				Log.d(TAG, "user_id->" + user_id);
+				edit.putInt(AppPreferences.Auth.KEY_PERSON_ID, user_id);
+				edit.commit();
 				return user_id;
 			} else {
 				renderError(obj);
