@@ -288,21 +288,6 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				fileNameTextview.setText(name);
 				filePath = pathToFile;
 				fileName=name;
-				
-				// Thread thread = new Thread(new Runnable() {
-				//
-				// @Override
-				// public void run() {
-				// final AmazonS3Client client = new AmazonS3Client(
-				// new BasicAWSCredentials("AKIAI56LEYR7PFQX3SRA",
-				// "3A71+q84uEoyqnBG51DZwdkBulP57jvi1GCZbjlS"));
-				// final File filetoupload = new File(filePath);
-				// PutObjectRequest por = new PutObjectRequest(
-				// "songbirdsongs", name, filetoupload);
-				// client.putObject(por);
-				// }
-				// });
-				// thread.start();
 
 			}
 		}
