@@ -1,5 +1,6 @@
 package com.example.elibrary.models;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -9,6 +10,14 @@ public class LibraryModel implements Parcelable {
 	private String userName;
 	private String category;
 	private int bookId;
+	private String profilePic;
+	private String type;
+	private int access;
+	private String isbn;
+	private String bookGenre;
+	private String privacy;
+	private Bitmap Imagebitmap;
+	private int user_id;
 
 	@Override
 	public int describeContents() {
@@ -23,6 +32,21 @@ public class LibraryModel implements Parcelable {
 		dest.writeString(userName);
 		dest.writeString(category);
 		dest.writeInt(bookId);
+		dest.writeString(profilePic);
+		dest.writeString(type);
+		dest.writeInt(access);
+		dest.writeString(isbn);
+		dest.writeString(bookGenre);
+		dest.writeString(privacy);
+		dest.writeInt(user_id);
+	}
+
+	public String getProfilePic() {
+		return profilePic;
+	}
+
+	public void setProfilePic(String profilePic) {
+		this.profilePic = profilePic;
 	}
 
 	public String getBookName() {
@@ -65,13 +89,70 @@ public class LibraryModel implements Parcelable {
 		this.bookId = bookId;
 	}
 
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+    
+	public int getUser_id() {
+		return user_id;
+	}
+
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
+	}
+
 	public LibraryModel() {
 
 	}
 
 	public LibraryModel(String bookName, String bookAuthor, String userName,
-			String category, int bookId) {
+			String category, int bookId, String profilePic) {
 
+	}
+
+	public int getAccess() {
+		return access;
+	}
+
+	public void setAccess(int access) {
+		this.access = access;
+	}
+
+	public String getIsbn() {
+		return isbn;
+	}
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
+	}
+
+	public String getBookGenre() {
+		return bookGenre;
+	}
+
+	public void setBookGenre(String bookGenre) {
+		this.bookGenre = bookGenre;
+	}
+
+	public String getPrivacy() {
+		return privacy;
+	}
+
+	public void setPrivacy(String privacy) {
+		this.privacy = privacy;
+	}
+	
+
+	public Bitmap getImagebitmap() {
+		return Imagebitmap;
+	}
+
+	public void setImagebitmap(Bitmap imagebitmap) {
+		Imagebitmap = imagebitmap;
 	}
 
 	public LibraryModel(Parcel source) {
@@ -80,6 +161,13 @@ public class LibraryModel implements Parcelable {
 		userName = source.readString();
 		category = source.readString();
 		bookId = source.readInt();
+		profilePic = source.readString();
+		type = source.readString();
+		access = source.readInt();
+		isbn = source.readString();
+		bookGenre = source.readString();
+		privacy = source.readString();
+		user_id=source.readInt();
 
 	}
 

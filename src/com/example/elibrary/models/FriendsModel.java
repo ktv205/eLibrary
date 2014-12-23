@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class FriendsModel implements Parcelable{
-
+  
 	private int id;
 	private String name;
 	private String email;

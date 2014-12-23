@@ -2,14 +2,27 @@ package com.example.elibrary.controllers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.example.elibrary.R;
+import com.example.elibrary.controllers.Friends.FriendsListAdapter.MyHolder;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
+import com.example.elibrary.controllers.Profile.BitmapAsyncTask;
 import com.example.elibrary.models.AppPreferences;
+import com.example.elibrary.models.LibraryModel;
 import com.example.elibrary.models.RequestParams;
 
 import android.annotation.SuppressLint;
@@ -20,8 +33,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.LiveFolders;
 import android.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,6 +61,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	private LinearLayout parentLinear;
 	private ScrollView scrollView;
 	private LayoutInflater mInflater;
+	private Map<String,ArrayList<LibraryModel>> booksMap;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +80,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
-				fetchData();
-				fillWithBooks();
+				new FetchBooksAsyncTask().execute(getParams());
+				// fetchData();
+				// fillWithBooks();
 			} else {
 				logout();
 			}
@@ -95,23 +114,52 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 	}
 
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		// ImageView view = (ImageView) scrollView
+		// .findViewById(R.id.single_book_cover);
+		// int height = view.getHeight();
+		// int width = view.getWidth();
+		// Log.d(TAG, "width of image view->" + width);
+		// Log.d(TAG, "height of image view->" + height);
+	}
+
 	@SuppressLint("InflateParams")
 	public void fillWithBooks() {
 		Log.d(TAG, "fillWithBooks");
-		for (int i = 0; i < 10; i++) {
+		
+		for (String key:booksMap.keySet()) {
 			View singleCategory = mInflater.inflate(
 					R.layout.inflate_single_category, null, false);
 			TextView textView = (TextView) singleCategory
 					.findViewById(R.id.single_category_textview_book_category);
+			Log.d(TAG,"category in fill books->"+key);
+			textView.setText(key);
 			LinearLayout horizontal = (LinearLayout) singleCategory
 					.findViewById(R.id.single_category_linearlayout_horizontal);
-			textView.setText("category");
 
-			for (int j = 0; j < 20; j++) {
+			for (int j = 0; j < booksMap.get(key).size(); j++) {
 				View singleBook = mInflater.inflate(
 						R.layout.inflate_singlebook, null, false);
 				ImageView imageView = (ImageView) singleBook
 						.findViewById(R.id.single_book_cover);
+				// imageView.setImageBitmap(profile.getTypes().get("uploads")
+				// .get(j).getImagebitmap());
+				new BitmapAsyncTask(imageView).execute(booksMap.get(key)
+						.get(j).getProfilePic());
+				TextView titleTextView = (TextView) singleBook
+						.findViewById(R.id.single_book_name);
+				TextView authorTextView = (TextView) singleBook
+						.findViewById(R.id.single_book_author);
+				TextView userNameTextView = (TextView) singleBook
+						.findViewById(R.id.single_book_user);
+				titleTextView.setText(booksMap.get(key)
+						.get(j).getBookName());
+				authorTextView.setText(booksMap.get(key)
+				.get(j).getBookAuthor());
+				userNameTextView.setText(booksMap.get(key)
+						.get(j).getUserName());
 				imageView.setOnClickListener(new OnClickListener() {
 
 					@Override
@@ -130,6 +178,21 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		scrollView.addView(parentLinear);
 		setContentView(scrollView);
 
+	}
+	public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
+		int width = bm.getWidth();
+		int height = bm.getHeight();
+		float scaleWidth = ((float) newWidth) / width;
+		float scaleHeight = ((float) newHeight) / height;
+		// CREATE A MATRIX FOR THE MANIPULATION
+		Matrix matrix = new Matrix();
+		// RESIZE THE BIT MAP
+		matrix.postScale(scaleWidth, scaleHeight);
+
+		// "RECREATE" THE NEW BITMAP
+		Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height,
+				matrix, false);
+		return resizedBitmap;
 	}
 
 	@Override
@@ -213,7 +276,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
 		} else if (id == R.id.setting_test) {
-			new TestAsyncTask().execute(getParams());
+			// new TestAsyncTask().execute(getParams());
 
 		}
 		return super.onOptionsItemSelected(item);
@@ -239,7 +302,23 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		finish();
 	}
 
-	public class FetchBooksAsyncTask extends AsyncTask<Void, Void, Void> {
+	public RequestParams getParams() {
+		Log.d(TAG, "getParams()");
+		RequestParams params = new RequestParams();
+		params.setMethod("POST");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/home ");
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("mobile", "1");
+		Log.d(TAG,
+				"user_id->"
+						+ authPref.getInt(AppPreferences.Auth.KEY_USERID, -1));
+		return params;
+	}
+
+	public class FetchBooksAsyncTask extends
+			AsyncTask<RequestParams, Void, String> {
 		ProgressDialog dialog;
 
 		@Override
@@ -249,91 +328,118 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		}
 
 		@Override
-		protected Void doInBackground(Void... params) {
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			dialog.dismiss();
-		}
-
-	}
-
-	public RequestParams getParams() {
-		Log.d(TAG, "getParams()");
-		RequestParams params = new RequestParams();
-		params.setMethod("GET");
-		params.setURI("http://" + AppPreferences.ipAdd   
-				+ "/eLibrary/library/index.php/profile");
-		params.setParam("user_id", String.valueOf(authPref.getInt(
-				AppPreferences.Auth.KEY_USERID, -1)));
-		params.setParam("user", String.valueOf(authPref.getInt(AppPreferences.Auth.KEY_USERID,-1)));
-		params.setParam("mobile", "1");
-		Log.d(TAG,
-				"user_id->"
-						+ authPref
-								.getInt(AppPreferences.Auth.KEY_USERID, -1));
-		return params;
-	}
-
-	public class TestAsyncTask extends AsyncTask<RequestParams, Void, String> {
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-		}
-
-		@Override
 		protected String doInBackground(RequestParams... params) {
-
-			// URL url = null;
-			// try {
-			// url = new URL(params[0].getURI() + "?"
-			// + params[0].getEncodedParams());
-			// Log.d(TAG, "In background->" + params[0].getURI() + "?"
-			// + params[0].getEncodedParams());
-			// } catch (MalformedURLException e) {
-			// e.printStackTrace();
-			// }
-			// HttpURLConnection con = null;
-			// try {
-			// con = (HttpURLConnection) url.openConnection();
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
-			// StringBuilder builder = new StringBuilder();
-			// String line = null;
-			// InputStreamReader reader = null;
-			// try {
-			// reader = new InputStreamReader(con.getInputStream());
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
-			// BufferedReader buffer = null;
-			// buffer = new BufferedReader(reader);
-			// try {
-			// line = buffer.readLine();
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
-			// while (line != null) {
-			// builder.append(line);
-			// try {
-			// line = buffer.readLine();
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
-			// }
-			// Log.d(TAG, "builder->" + builder.toString());
-			
 			return new HttpManager().sendUserData(params[0]);
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
-			super.onPostExecute(result);
+			dialog.dismiss();
 			Log.d(TAG, "onPostExecute->" + result);
+			booksMap=new HashMap<String, ArrayList<LibraryModel>>();
+			try {
+				JSONObject mainObject=new JSONObject(result);
+				int success=mainObject.getInt("success");
+				Log.d(TAG,"success for getting json object->"+success);
+				if(success==1){
+					Log.d(TAG,"inside if success");
+					JSONArray libraryArray=mainObject.getJSONArray("library");
+					for(int i=0;i<libraryArray.length();i++){
+						JSONObject booksObjectByCategory=libraryArray.getJSONObject(i);
+						String genre=booksObjectByCategory.getString("genre");
+						Log.d(TAG,"genre->"+genre);
+						getBooksByCategory(genre, booksMap, booksObjectByCategory);
+						
+					}
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			fillWithBooks();
+		}
+		public void getBooksByCategory(String genre,Map<String, ArrayList<LibraryModel>> booksMap,JSONObject booksObjectByCategory){
+			  ArrayList<LibraryModel> libraryModel=new ArrayList<LibraryModel>();
+			  try {
+				JSONArray booksArray=booksObjectByCategory.getJSONArray("books");
+				for(int i=0;i<booksArray.length();i++){
+					JSONObject bookObject=booksArray.getJSONObject(i);
+					LibraryModel model=new LibraryModel();
+					model.setCategory(genre);
+					model.setBookAuthor(bookObject.getString("book_author"));
+					model.setBookId(Integer.valueOf(bookObject.getString("book_id")));
+					model.setBookName(bookObject.getString("book_title"));
+					model.setIsbn(bookObject.getString("book_isbn"));
+					model.setAccess(bookObject.getInt("access"));
+					model.setProfilePic(bookObject.getString("book_pic"));
+					JSONObject userObject=bookObject.getJSONObject("uploaded_by");
+					model.setUserName(userObject.getString("user_name"));
+					model.setUser_id(Integer.valueOf(userObject.getString("user_id")));
+					libraryModel.add(model);
+				}
+				booksMap.put(genre, libraryModel);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 
+	}
+	public class BitmapAsyncTask extends AsyncTask<String, Void, Bitmap> {
+		MyHolder holder;
+		LibraryModel model;
+		ImageView view;
+
+		public BitmapAsyncTask(MyHolder holder) {
+			this.holder = holder;
+		}
+
+		public BitmapAsyncTask() {
+
+		}
+
+		public BitmapAsyncTask(LibraryModel model) {
+			this.model = model;
+		}
+
+		public BitmapAsyncTask(ImageView imageView) {
+			this.view = imageView;
+		}
+
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			InputStream input = null;
+			try {
+				URL url = new URL(params[0]);
+				Log.d(TAG, "cover pic url->" + params[0]);
+				if (params[0].contains("https")) {
+					HttpsURLConnection connection = (HttpsURLConnection) url
+							.openConnection();
+					connection.setDoInput(true);
+					connection.connect();
+					input = connection.getInputStream();
+				} else {
+					HttpURLConnection connection = (HttpURLConnection) url
+							.openConnection();
+					connection.setDoInput(true);
+					connection.connect();
+					input = connection.getInputStream();
+				}
+
+				Bitmap myBitmap = BitmapFactory.decodeStream(input);
+				return myBitmap;
+			} catch (IOException e) {
+				// Log exception
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			result=getResizedBitmap(result, 300, 300);
+			view.setImageBitmap(result);
+
+		}
 	}
 }

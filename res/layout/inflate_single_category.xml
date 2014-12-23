@@ -8,7 +8,9 @@
     <TextView
         android:id="@+id/single_category_textview_book_category"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/darkred" >
     </TextView>
 
     <HorizontalScrollView
@@ -23,5 +25,10 @@
             android:orientation="horizontal" >
         </LinearLayout>
     </HorizontalScrollView>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#000000" />
 
 </LinearLayout>

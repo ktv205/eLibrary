@@ -19,15 +19,20 @@
         <TextView
             android:id="@+id/contents_list_search_textview_name"
             android:layout_width="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/contents_list_search_texview_email"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/blue"
-            android:layout_height="wrap_content" />
+            android:textColor="@color/blue" />
+
+        <TextView android:id="@+id/contents_list_search_textview_userid"
+            android:layout_width="0dp"
+            android:layout_height="0dp" >
+        </TextView>
     </LinearLayout>
 
 </LinearLayout>

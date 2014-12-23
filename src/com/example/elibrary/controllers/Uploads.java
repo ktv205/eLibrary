@@ -6,13 +6,27 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.elibrary.R;
+import com.example.elibrary.controllers.Friends.FriendsListAdapter.MyHolder;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
+import com.example.elibrary.controllers.MainActivity.BitmapAsyncTask;
 import com.example.elibrary.models.AppPreferences;
+import com.example.elibrary.models.LibraryModel;
+import com.example.elibrary.models.RequestParams;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import android.annotation.SuppressLint;
@@ -53,13 +67,14 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 	private SharedPreferences authPref;
 	private int auth;
 	private Context context;
-	//private ImageButton uploadButton;
-	private Button submitButton,uploadButton;
+	// private ImageButton uploadButton;
+	private Button submitButton, uploadButton;
 	private TextView fileNameTextview;
 	private LayoutInflater mInflater;
 	private static final int PICK_FILE_REQUEST = 1;
 	private LinearLayout parentLinear;
-	private String filePath,fileName;
+	private String filePath, fileName;
+	ArrayList<LibraryModel> libraryModel;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +90,8 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				initialize();
-				fillBooks();
+				new GetUploadHistoryAsycTask().execute(getRequestParams());
+				// fillBooks();
 			} else {
 				logout();
 			}
@@ -83,6 +99,24 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		} else {
 
 		}
+	}
+
+	public RequestParams getRequestParams() {
+		Log.d(TAG, "getParams()");
+		RequestParams params = new RequestParams();
+		params.setMethod("GET");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/profile");
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("user", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("mobile", "1");
+		Log.d(TAG,
+				"user_id->"
+						+ authPref.getInt(AppPreferences.Auth.KEY_USERID, -1));
+		return params;
+
 	}
 
 	@Override
@@ -97,7 +131,8 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 	}
 
 	public void initialize() {
-		//uploadButton = (ImageButton) findViewById(R.id.uploads_button_uplaod);
+		// uploadButton = (ImageButton)
+		// findViewById(R.id.uploads_button_uplaod);
 		uploadButton = (Button) findViewById(R.id.uploads_button_uplaod);
 		submitButton = (Button) findViewById(R.id.uploads_button_submit);
 		fileNameTextview = (TextView) findViewById(R.id.uploads_textview_filename);
@@ -105,10 +140,11 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		fileNameTextview.setText("");
 		uploadButton.setOnClickListener(this);
 		submitButton.setOnClickListener(this);
-		Bitmap bitmap=BitmapFactory.decodeResource(getResources(), R.drawable.uploadbutton1);
-		bitmap=getResizedBitmap(bitmap,96,256);
-		//uploadButton.setImageBitmap(bitmap);
-		
+		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
+				R.drawable.uploadbutton1);
+		bitmap = getResizedBitmap(bitmap, 96, 256);
+		// uploadButton.setImageBitmap(bitmap);
+
 	}
 
 	public void fillBooks() {
@@ -116,14 +152,28 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				R.layout.inflate_single_category, null, false);
 		TextView textView = (TextView) singleCategory
 				.findViewById(R.id.single_category_textview_book_category);
+		Log.d(TAG,"category in fill books->"+"My Upload History");
+		textView.setText("Uploads");
 		LinearLayout horizontal = (LinearLayout) singleCategory
 				.findViewById(R.id.single_category_linearlayout_horizontal);
-		textView.setText("category");
-		for (int j = 0; j < 20; j++) {
-			View singleBook = mInflater.inflate(R.layout.inflate_singlebook,
-					null, false);
+
+		for (int j = 0; j < libraryModel.size(); j++) {
+			View singleBook = mInflater.inflate(
+					R.layout.inflate_singlebook, null, false);
 			ImageView imageView = (ImageView) singleBook
 					.findViewById(R.id.single_book_cover);
+			// imageView.setImageBitmap(profile.getTypes().get("uploads")
+			// .get(j).getImagebitmap());
+			new BitmapAsyncTask(imageView).execute(libraryModel.get(j).getProfilePic());
+			TextView titleTextView = (TextView) singleBook
+					.findViewById(R.id.single_book_name);
+			TextView authorTextView = (TextView) singleBook
+					.findViewById(R.id.single_book_author);
+			TextView userNameTextView = (TextView) singleBook
+					.findViewById(R.id.single_book_user);
+			titleTextView.setText(libraryModel.get(j).getBookName());
+			authorTextView.setText(libraryModel.get(j).getBookAuthor());
+			userNameTextView.setText(libraryModel.get(j).getUserName());
 			imageView.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -200,14 +250,16 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		setMenuName();
 		return true;
 	}
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-    		super.onWindowFocusChanged(hasFocus);
-    		int width=submitButton.getWidth();
-    		int height=submitButton.getHeight();
-    		Log.d(TAG,"height of submit button->"+height);
-    		Log.d(TAG,"width of the submit button->"+width);
-    }
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		int width = submitButton.getWidth();
+		int height = submitButton.getHeight();
+		Log.d(TAG, "height of submit button->" + height);
+		Log.d(TAG, "width of the submit button->" + width);
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -264,10 +316,11 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		int id = v.getId();
 		if (id == uploadButton.getId()) {
 			getFile();
-		}else if(id==submitButton.getId()){
-			if(fileNameTextview.getText().toString().equals("")){
-				Toast.makeText(this, "select a book using upload button", Toast.LENGTH_LONG).show();
-			}else{
+		} else if (id == submitButton.getId()) {
+			if (fileNameTextview.getText().toString().equals("")) {
+				Toast.makeText(this, "select a book using upload button",
+						Toast.LENGTH_LONG).show();
+			} else {
 				new BookUploadAsyncTask().execute(new String[] { filePath,
 						fileName });
 			}
@@ -303,10 +356,10 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 					pathToFile = makeFile(name, data);
 					Log.d(TAG, "path to file is" + pathToFile);
 				}
-				String substring=name.substring(0, 10)+"...";
+				String substring = name.substring(0, 10) + "...";
 				fileNameTextview.setText(substring);
 				filePath = pathToFile;
-				fileName=name;
+				fileName = name;
 
 			}
 		}
@@ -383,6 +436,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		return PathToDir + "/" + name;
 
 	}
+
 	public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
 		int width = bm.getWidth();
 		int height = bm.getHeight();
@@ -398,19 +452,20 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				matrix, false);
 		return resizedBitmap;
 	}
+
 	public class BookUploadAsyncTask extends AsyncTask<String[], Void, Void> {
 		ProgressDialog dialog;
 
 		@Override
 		protected void onPreExecute() {
-			super.onPreExecute();
+
 			dialog = new ProgressDialog(Uploads.this);
 			dialog.show();
 		}
 
 		@Override
 		protected Void doInBackground(String[]... params) {
-			
+
 			return null;
 		}
 
@@ -420,9 +475,146 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			Toast.makeText(Uploads.this, "UploadComplete", Toast.LENGTH_LONG)
 					.show();
 			fileNameTextview.setText("");
-			fileName=null;
-			filePath=null;
+			fileName = null;
+			filePath = null;
 		}
 	}
-	
+
+	public class GetUploadHistoryAsycTask extends
+			AsyncTask<RequestParams, Void, String> {
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+
+			dialog = new ProgressDialog(Uploads.this);
+			dialog.show();
+		}
+
+		@Override
+		protected String doInBackground(RequestParams... params) {
+			// TODO Auto-generated method stub
+			return new HttpManager().sendUserData(params[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			dialog.dismiss();
+			Log.d(TAG, result);
+			libraryModel = new ArrayList<LibraryModel>();
+			JSONObject mainObject = null;
+			try {
+				mainObject = new JSONObject(result);
+				int success = mainObject.getInt("success");
+				Log.d(TAG, "id->" + success);
+				if (success == 1) {
+					JSONObject userLibObject = mainObject
+							.getJSONObject("user_lib");
+					JSONArray uploadsArray = userLibObject
+							.getJSONArray("uploads");
+					getBooksInfo(uploadsArray, libraryModel);
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+
+		public void getBooksInfo(JSONArray array,
+				ArrayList<LibraryModel> libraryModel) {
+
+			try {
+
+				for (int i = 0; i < array.length(); i++) {
+					Log.d(TAG, "book number in loop->" + i);
+					JSONObject bookObject = array.getJSONObject(i);
+					LibraryModel model = new LibraryModel();
+					model.setBookId(Integer.valueOf(bookObject
+							.getString("book_id")));
+					Log.d(TAG, "setBookId->" + model.getBookId());
+					model.setPrivacy(bookObject.getString("book_id"));
+					Log.d(TAG, "setBookId->" + model.getPrivacy());
+					model.setBookAuthor(bookObject.getString("book_author"));
+					Log.d(TAG, "setBookAuthor->" + model.getBookAuthor());
+					model.setBookName(bookObject.getString("book_title"));
+					Log.d(TAG, "setBookTitle->" + model.getBookName());
+					model.setProfilePic(bookObject.getString("book_pic"));
+					Log.d(TAG, "setBookPic->" + model.getProfilePic());
+					model.setAccess(Integer.valueOf(bookObject
+							.getString("access")));
+					Log.d(TAG, "setBookAccess->" + model.getAccess());
+					model.setBookGenre(bookObject.getString("book_genre"));
+					Log.d(TAG, "setBookGenre->" + model.getBookGenre());
+					JSONObject uploadedUserObject = bookObject
+							.getJSONObject("uploaded_by");
+					model.setUserName(uploadedUserObject.getString("user_name"));
+					Log.d(TAG, "setUserName->" + model.getUserName());
+					libraryModel.add(model);
+
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            fillBooks();
+		}
+	}
+	public class BitmapAsyncTask extends AsyncTask<String, Void, Bitmap> {
+		MyHolder holder;
+		LibraryModel model;
+		ImageView view;
+
+		public BitmapAsyncTask(MyHolder holder) {
+			this.holder = holder;
+		}
+
+		public BitmapAsyncTask() {
+
+		}
+
+		public BitmapAsyncTask(LibraryModel model) {
+			this.model = model;
+		}
+
+		public BitmapAsyncTask(ImageView imageView) {
+			this.view = imageView;
+		}
+
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			InputStream input = null;
+			try {
+				URL url = new URL(params[0]);
+				Log.d(TAG, "cover pic url->" + params[0]);
+				if (params[0].contains("https")) {
+					HttpsURLConnection connection = (HttpsURLConnection) url
+							.openConnection();
+					connection.setDoInput(true);
+					connection.connect();
+					input = connection.getInputStream();
+				} else {
+					HttpURLConnection connection = (HttpURLConnection) url
+							.openConnection();
+					connection.setDoInput(true);
+					connection.connect();
+					input = connection.getInputStream();
+				}
+
+				Bitmap myBitmap = BitmapFactory.decodeStream(input);
+				return myBitmap;
+			} catch (IOException e) {
+				// Log exception
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			result=getResizedBitmap(result, 300, 300);
+			view.setImageBitmap(result);
+
+		}
+	}
+
 }
