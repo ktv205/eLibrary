@@ -65,8 +65,9 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		if (CheckConnection.isConnected(context)) {
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
-				trainingSet();
+				//trainingSet();
 				setMenuName();
+				new FriendsAsyncTask().execute(getRequestParams());
 			} else {
 				logout();
 			}
@@ -97,7 +98,21 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 			}
 		});
 	}
-
+    public RequestParams getRequestParams(){
+    	Log.d(TAG, "getParams()");
+		RequestParams params = new RequestParams();
+		params.setMethod("POST");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/friends");
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("mobile", "1");
+		Log.d(TAG,
+				"user_id->"
+						+ authPref.getInt(AppPreferences.Auth.KEY_USERID, -1));
+		return params;
+    	
+    }
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -210,7 +225,7 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 	}
 
 	public class FriendsAsyncTask extends
-			AsyncTask<RequestParams, Void, ArrayList<FriendsModel>> {
+			AsyncTask<RequestParams, Void, String> {
 		@Override
 		protected void onPreExecute() {
 			// TODO Auto-generated method stub
@@ -218,16 +233,15 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		}
 
 		@Override
-		protected ArrayList<FriendsModel> doInBackground(
+		protected String doInBackground(
 				RequestParams... params) {
 			// TODO Auto-generated method stub
-			return null;
+			return new HttpManager().sendUserData(params[0]);
 		}
 
 		@Override
-		protected void onPostExecute(ArrayList<FriendsModel> result) {
-			// TODO Auto-generated method stub
-			super.onPostExecute(result);
+		protected void onPostExecute(String result) {
+			Log.d(TAG,"result->"+result);
 		}
 
 	}

@@ -107,12 +107,12 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Intent intent=new Intent(SearchActivity.this, Book.class);
-				TextView bookId=(TextView) view.findViewById(R.id.contents_list_books_search_textview_bookid);
+				Intent intent = new Intent(SearchActivity.this, Book.class);
+				TextView bookId = (TextView) view
+						.findViewById(R.id.contents_list_books_search_textview_bookid);
 				intent.putExtra("book_id", bookId.getText().toString());
 				startActivity(intent);
-				
-				
+
 			}
 		});
 	}
@@ -130,8 +130,8 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 				String toUserId = userIdTextView.getText().toString();
 				Intent intent = new Intent(SearchActivity.this, Profile.class);
 				intent.putExtra("to_user_id", toUserId);
-				intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
-						AppPreferences.FRIEND);
+				// intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
+				// AppPreferences.S);
 				startActivity(intent);
 			}
 		});
@@ -525,7 +525,8 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			}
 			myHolder.title.setText(libraryModel.get(position).getBookName());
 			myHolder.author.setText(libraryModel.get(position).getBookAuthor());
-			myHolder.bookId.setText(String.valueOf(libraryModel.get(position).getBookId()));
+			myHolder.bookId.setText(String.valueOf(libraryModel.get(position)
+					.getBookId()));
 			// new
 			// BitmapAsyncTask(BookHolder).execute(toBeFriendsList.get(position)
 			// .getProfilePic());

@@ -46,6 +46,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Profile extends Activity implements OnLogoutSuccessful {
 	private static final String TAG = "Profile";
@@ -57,7 +58,8 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 	private static int who;
 	private LinearLayout parentLinear;
 	private ScrollView parentScroll;
-	private TextView nameTextView, emailTextView, booksUploadedTextView;
+	private TextView nameTextView, emailTextView, booksUploadedTextView,titleTextView;
+	private Button friendButton;
 	private ImageView profilePicImageView;
 	private ProfileModel profile;
 	private int selfFlag=1;
@@ -113,6 +115,8 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		nameTextView = (TextView) findViewById(R.id.profile_textview_name);
 		emailTextView = (TextView) findViewById(R.id.profile_textview_email);
 		booksUploadedTextView = (TextView) findViewById(R.id.profile_textview_uploaded);
+		friendButton=(Button)findViewById(R.id.profile_button_friend);
+		titleTextView=(TextView)findViewById(R.id.profile_textview_title);
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
 				R.drawable.ic_launcher);
 		profilePicImageView = (ImageView) findViewById(R.id.profile_imageview_profilepic);
@@ -159,18 +163,33 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		} else {
 			rows = 2;
 		}
-		Button button = new Button(context);
-		if (who == AppPreferences.FRIEND || profile.getFriendship()=="yes" ) {
-			button.setText("friends");
-			parentLinear.addView(button);
+		
+		if (who == AppPreferences.FRIEND || profile.getFriendship().equals("friends") ) {
+		   friendButton.setText("friends");
+		   titleTextView.setText("Library");
 			rows = 2;
-		} else if (who == AppPreferences.STRANGER || profile.getFriendship()=="no") {
-			button.setText("add friend");
-			parentLinear.addView(button);
+		} else if (who == AppPreferences.STRANGER || profile.getFriendship().equals("no")) {
+			friendButton.setText("add friend");
+			titleTextView.setText("Library");
 			rows = 2;
-		} else if (who == AppPreferences.SELF || profile.getFriendship()=="self") {
+		} else if (who == AppPreferences.SELF || profile.getFriendship().equals("self")) {
+			friendButton.setText("self");
+			titleTextView.setText("My Library");
 			rows = 3;
+		}else if(profile.getFriendship().equals("pending")){
+			friendButton.setText("pending");
 		}
+		friendButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+			   if(profile.getFriendship().equals("no")){
+				   friendButton.setText("pending");
+				   Toast.makeText(Profile.this, "friend request sent", Toast.LENGTH_SHORT).show();
+			   }
+			}
+		});
+		
 		for (int i = 0; i < rows; i++) {
 			Log.d(TAG, "inside rows for loop");
 			View singleCategory = mInflater.inflate(

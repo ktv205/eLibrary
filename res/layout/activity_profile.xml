@@ -33,38 +33,49 @@
                     android:id="@+id/profile_textview_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                     android:textColor="#000000"
-                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="@string/string_name" />
+                    android:text="@string/string_name"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="#000000" />
 
                 <TextView
                     android:id="@+id/profile_textview_email"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="@string/string_email"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/blue"
-                    android:text="@string/string_email" />
+                    android:textColor="@color/blue" />
 
                 <TextView
                     android:id="@+id/profile_textview_uploaded"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="@string/string_uploaded"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="#000000"
-                    android:text="@string/string_uploaded" />
+                    android:textColor="#000000" />
             </LinearLayout>
         </LinearLayout>
-         <View
-             android:layout_width="fill_parent"
-             android:layout_height="2dp"
-             android:background="#c0c0c0"/>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:background="#c0c0c0" />
+
+        <Button
+            android:id="@+id/profile_button_friend"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="#FFFFFF"
+            android:background="@xml/mybutton" >
+        </Button>
 
         <TextView
+            android:id="@+id/profile_textview_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/string_library" />
+            android:text="@string/string_library"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
     </LinearLayout>
 
 </ScrollView>

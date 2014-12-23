@@ -61,7 +61,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	private LinearLayout parentLinear;
 	private ScrollView scrollView;
 	private LayoutInflater mInflater;
-	private Map<String,ArrayList<LibraryModel>> booksMap;
+	private Map<String, ArrayList<LibraryModel>> booksMap;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +80,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
-				new FetchBooksAsyncTask().execute(getParams());
+			     new FetchBooksAsyncTask().execute(getParams());
 				// fetchData();
 				// fillWithBooks();
 			} else {
@@ -128,13 +128,13 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	@SuppressLint("InflateParams")
 	public void fillWithBooks() {
 		Log.d(TAG, "fillWithBooks");
-		
-		for (String key:booksMap.keySet()) {
+
+		for (String key : booksMap.keySet()) {
 			View singleCategory = mInflater.inflate(
 					R.layout.inflate_single_category, null, false);
 			TextView textView = (TextView) singleCategory
 					.findViewById(R.id.single_category_textview_book_category);
-			Log.d(TAG,"category in fill books->"+key);
+			Log.d(TAG, "category in fill books->" + key);
 			textView.setText(key);
 			LinearLayout horizontal = (LinearLayout) singleCategory
 					.findViewById(R.id.single_category_linearlayout_horizontal);
@@ -146,20 +146,19 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 						.findViewById(R.id.single_book_cover);
 				// imageView.setImageBitmap(profile.getTypes().get("uploads")
 				// .get(j).getImagebitmap());
-				new BitmapAsyncTask(imageView).execute(booksMap.get(key)
-						.get(j).getProfilePic());
+				new BitmapAsyncTask(imageView).execute(booksMap.get(key).get(j)
+						.getProfilePic());
 				TextView titleTextView = (TextView) singleBook
 						.findViewById(R.id.single_book_name);
 				TextView authorTextView = (TextView) singleBook
 						.findViewById(R.id.single_book_author);
 				TextView userNameTextView = (TextView) singleBook
 						.findViewById(R.id.single_book_user);
-				titleTextView.setText(booksMap.get(key)
-						.get(j).getBookName());
-				authorTextView.setText(booksMap.get(key)
-				.get(j).getBookAuthor());
-				userNameTextView.setText(booksMap.get(key)
-						.get(j).getUserName());
+				titleTextView.setText(booksMap.get(key).get(j).getBookName());
+				authorTextView
+						.setText(booksMap.get(key).get(j).getBookAuthor());
+				userNameTextView
+						.setText(booksMap.get(key).get(j).getUserName());
 				imageView.setOnClickListener(new OnClickListener() {
 
 					@Override
@@ -179,6 +178,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		setContentView(scrollView);
 
 	}
+
 	public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
 		int width = bm.getWidth();
 		int height = bm.getHeight();
@@ -336,45 +336,52 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		protected void onPostExecute(String result) {
 			dialog.dismiss();
 			Log.d(TAG, "onPostExecute->" + result);
-			booksMap=new HashMap<String, ArrayList<LibraryModel>>();
-			try {
-				JSONObject mainObject=new JSONObject(result);
-				int success=mainObject.getInt("success");
-				Log.d(TAG,"success for getting json object->"+success);
-				if(success==1){
-					Log.d(TAG,"inside if success");
-					JSONArray libraryArray=mainObject.getJSONArray("library");
-					for(int i=0;i<libraryArray.length();i++){
-						JSONObject booksObjectByCategory=libraryArray.getJSONObject(i);
-						String genre=booksObjectByCategory.getString("genre");
-						Log.d(TAG,"genre->"+genre);
-						getBooksByCategory(genre, booksMap, booksObjectByCategory);
-						
-					}
-				}
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			fillWithBooks();
+			// booksMap=new HashMap<String, ArrayList<LibraryModel>>();
+			// try {
+			// JSONObject mainObject=new JSONObject(result);
+			// int success=mainObject.getInt("success");
+			// Log.d(TAG,"success for getting json object->"+success);
+			// if(success==1){
+			// Log.d(TAG,"inside if success");
+			// JSONArray libraryArray=mainObject.getJSONArray("library");
+			// for(int i=0;i<libraryArray.length();i++){
+			// JSONObject booksObjectByCategory=libraryArray.getJSONObject(i);
+			// String genre=booksObjectByCategory.getString("genre");
+			// Log.d(TAG,"genre->"+genre);
+			// getBooksByCategory(genre, booksMap, booksObjectByCategory);
+			//
+			// }
+			// }
+			// } catch (JSONException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+			// fillWithBooks();
 		}
-		public void getBooksByCategory(String genre,Map<String, ArrayList<LibraryModel>> booksMap,JSONObject booksObjectByCategory){
-			  ArrayList<LibraryModel> libraryModel=new ArrayList<LibraryModel>();
-			  try {
-				JSONArray booksArray=booksObjectByCategory.getJSONArray("books");
-				for(int i=0;i<booksArray.length();i++){
-					JSONObject bookObject=booksArray.getJSONObject(i);
-					LibraryModel model=new LibraryModel();
+
+		public void getBooksByCategory(String genre,
+				Map<String, ArrayList<LibraryModel>> booksMap,
+				JSONObject booksObjectByCategory) {
+			ArrayList<LibraryModel> libraryModel = new ArrayList<LibraryModel>();
+			try {
+				JSONArray booksArray = booksObjectByCategory
+						.getJSONArray("books");
+				for (int i = 0; i < booksArray.length(); i++) {
+					JSONObject bookObject = booksArray.getJSONObject(i);
+					LibraryModel model = new LibraryModel();
 					model.setCategory(genre);
 					model.setBookAuthor(bookObject.getString("book_author"));
-					model.setBookId(Integer.valueOf(bookObject.getString("book_id")));
+					model.setBookId(Integer.valueOf(bookObject
+							.getString("book_id")));
 					model.setBookName(bookObject.getString("book_title"));
 					model.setIsbn(bookObject.getString("book_isbn"));
 					model.setAccess(bookObject.getInt("access"));
 					model.setProfilePic(bookObject.getString("book_pic"));
-					JSONObject userObject=bookObject.getJSONObject("uploaded_by");
+					JSONObject userObject = bookObject
+							.getJSONObject("uploaded_by");
 					model.setUserName(userObject.getString("user_name"));
-					model.setUser_id(Integer.valueOf(userObject.getString("user_id")));
+					model.setUser_id(Integer.valueOf(userObject
+							.getString("user_id")));
 					libraryModel.add(model);
 				}
 				booksMap.put(genre, libraryModel);
@@ -382,10 +389,11 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 
 	}
+
 	public class BitmapAsyncTask extends AsyncTask<String, Void, Bitmap> {
 		MyHolder holder;
 		LibraryModel model;
@@ -437,7 +445,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			result=getResizedBitmap(result, 300, 300);
+			result = getResizedBitmap(result, 300, 300);
 			view.setImageBitmap(result);
 
 		}
