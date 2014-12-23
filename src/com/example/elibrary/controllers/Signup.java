@@ -136,8 +136,8 @@ public class Signup extends Activity implements OnClickListener {
 		params.setMethod("POST");
 		params.setParam("user_name", user.getName());
 		params.setParam("user_email", user.getEmail());
-		params.setParam("p", user.getPassword());
-		params.setParam("usre_auth", user.getAuth());
+		params.setParam("password", user.getPassword());
+		params.setParam("user_auth", user.getAuth());
 		params.setParam("mobile", "1");
 		return params;
 

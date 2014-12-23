@@ -13,6 +13,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.elibrary.R;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
 import com.example.elibrary.models.AppPreferences;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -23,6 +24,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -35,6 +39,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
@@ -48,7 +53,8 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 	private SharedPreferences authPref;
 	private int auth;
 	private Context context;
-	private Button uploadButton, submitButton;
+	//private ImageButton uploadButton;
+	private Button submitButton,uploadButton;
 	private TextView fileNameTextview;
 	private LayoutInflater mInflater;
 	private static final int PICK_FILE_REQUEST = 1;
@@ -91,6 +97,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 	}
 
 	public void initialize() {
+		//uploadButton = (ImageButton) findViewById(R.id.uploads_button_uplaod);
 		uploadButton = (Button) findViewById(R.id.uploads_button_uplaod);
 		submitButton = (Button) findViewById(R.id.uploads_button_submit);
 		fileNameTextview = (TextView) findViewById(R.id.uploads_textview_filename);
@@ -98,6 +105,10 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		fileNameTextview.setText("");
 		uploadButton.setOnClickListener(this);
 		submitButton.setOnClickListener(this);
+		Bitmap bitmap=BitmapFactory.decodeResource(getResources(), R.drawable.uploadbutton1);
+		bitmap=getResizedBitmap(bitmap,96,256);
+		//uploadButton.setImageBitmap(bitmap);
+		
 	}
 
 	public void fillBooks() {
@@ -189,7 +200,14 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		setMenuName();
 		return true;
 	}
-
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+    		super.onWindowFocusChanged(hasFocus);
+    		int width=submitButton.getWidth();
+    		int height=submitButton.getHeight();
+    		Log.d(TAG,"height of submit button->"+height);
+    		Log.d(TAG,"width of the submit button->"+width);
+    }
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -285,7 +303,8 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 					pathToFile = makeFile(name, data);
 					Log.d(TAG, "path to file is" + pathToFile);
 				}
-				fileNameTextview.setText(name);
+				String substring=name.substring(0, 10)+"...";
+				fileNameTextview.setText(substring);
 				filePath = pathToFile;
 				fileName=name;
 
@@ -364,7 +383,21 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		return PathToDir + "/" + name;
 
 	}
+	public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
+		int width = bm.getWidth();
+		int height = bm.getHeight();
+		float scaleWidth = ((float) newWidth) / width;
+		float scaleHeight = ((float) newHeight) / height;
+		// CREATE A MATRIX FOR THE MANIPULATION
+		Matrix matrix = new Matrix();
+		// RESIZE THE BIT MAP
+		matrix.postScale(scaleWidth, scaleHeight);
 
+		// "RECREATE" THE NEW BITMAP
+		Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height,
+				matrix, false);
+		return resizedBitmap;
+	}
 	public class BookUploadAsyncTask extends AsyncTask<String[], Void, Void> {
 		ProgressDialog dialog;
 
@@ -391,4 +424,5 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			filePath=null;
 		}
 	}
+	
 }

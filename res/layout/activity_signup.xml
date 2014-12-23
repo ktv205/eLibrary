@@ -80,10 +80,21 @@
             android:inputType="textPassword" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/signup_button_signup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/signup_string" />
+    <RelativeLayout
+        android:id="@+id/signup_relativelayout_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/signup_button_signup"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@xml/mybutton"
+            android:text="@string/signup_string"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_marginTop="100dp"
+            android:textColor="#FFFFFF" />
+    </RelativeLayout>
 
 </LinearLayout>

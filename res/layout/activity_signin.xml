@@ -49,10 +49,23 @@
         android:text="@string/string_signin_textview_forgot"
         android:textColor="@color/blue" />
 
-    <Button
-        android:id="@+id/signin_button_signin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/signin_string" />
+    <RelativeLayout
+        android:id="@+id/signin_relativelayout_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/signin_button_signin"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:text="@string/signin_string"
+            android:background="@xml/mybutton"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_marginRight="40dp"
+            android:layout_marginEnd="40dp"
+            android:textColor="#FFFFFF" />
+    </RelativeLayout>
 
 </LinearLayout>

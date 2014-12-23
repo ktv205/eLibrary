@@ -28,7 +28,7 @@
     <string name="string_item_logout">logout</string>
     <string name="string_item_library">library</string>
     <string name="string_item_uploads">uploads</string>
-    <string name="string_button_upload">uplaod</string>
+    <string name="string_button_upload">upload</string>
     <string name="string_textview_filename">filename</string>
     <string name="string_textview_uploads_history">upload history</string>
     <string name="string_item_friends">friends</string>
@@ -44,6 +44,8 @@
     <string name="string_uploaded">books uploaded</string>
     <string name="string_library">My Library</string>
     <string name="string_test">test response</string>
+    <string name="string_happy">Happy</string>
+    <string name="string_Reading">Reading</string>
     <string-array name="string_books_category">
         <item>biography</item>
     </string-array>

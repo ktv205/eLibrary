@@ -33,18 +33,22 @@
                     android:id="@+id/profile_textview_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text="@string/string_name" />
 
                 <TextView
                     android:id="@+id/profile_textview_email"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/blue"
                     android:text="@string/string_email" />
 
                 <TextView
                     android:id="@+id/profile_textview_uploaded"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text="@string/string_uploaded" />
             </LinearLayout>
         </LinearLayout>
@@ -53,6 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/string_library" />
     </LinearLayout>
 

@@ -13,23 +13,32 @@
         <Button
             android:id="@+id/uploads_button_uplaod"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/string_button_upload" />
+            android:layout_marginTop="20dp"
+            android:layout_weight="1"
+            android:background="@xml/mybutton"
+            android:text="@string/string_button_upload"
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:id="@+id/uploads_textview_filename"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-             />
+            android:layout_marginTop="20dp"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/blue" />
 
         <Button
             android:id="@+id/uploads_button_submit"
-             android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/string_submit" >
+            android:layout_marginTop="20dp"
+            android:layout_weight="1"
+            android:background="@xml/mybutton"
+            android:text="@string/string_submit"
+            android:textColor="#FFFFFF" >
         </Button>
     </LinearLayout>
 
@@ -37,7 +46,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="@string/string_textview_uploads_history" >
+        android:text="@string/string_textview_uploads_history"
+        android:textAppearance="?android:attr/textAppearanceLarge" >
     </TextView>
 
 </LinearLayout>

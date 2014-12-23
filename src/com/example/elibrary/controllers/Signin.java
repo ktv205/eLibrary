@@ -137,7 +137,8 @@ public class Signin extends Activity implements OnClickListener {
 				+ "/eLibrary/lib/includes/process_login.php");
 		params.setMethod("POST");
 		params.setParam("user_email", user.getEmail());
-		params.setParam("p", user.getPassword());
+		params.setParam("password", user.getPassword());
+		params.setParam("user_auth",user.getAuth());
 		params.setParam("mobile", "1");
 		return params;
 
@@ -163,6 +164,7 @@ public class Signin extends Activity implements OnClickListener {
 		user = new UserModel();
 		user.setEmail(email);
 		user.setPassword(password);
+		user.setAuth("gen");
 		user.setAuth(AppPreferences.Auth.EMAIL_ENUM);
 	}
 
@@ -171,7 +173,8 @@ public class Signin extends Activity implements OnClickListener {
 		@Override
 		protected String doInBackground(RequestParams... params) {
 			// TODO Auto-generated method stub
-			return new HttpManager().sendUserData(params[0]);
+			//return new HttpManager().sendUserData(params[0]);
+			return HttpManager.hitTheServer(params[0]);
 		}
 
 		@Override
@@ -219,6 +222,7 @@ public class Signin extends Activity implements OnClickListener {
 		edit.putInt(AppPreferences.Auth.KEY_AUTH,
 				AppPreferences.Auth.EMAIL_AUTH);
 		edit.putInt(AppPreferences.Auth.KEY_USERID, user.getUser_id());
+		Log.d(TAG,"userId->"+user.getUser_id());
 		edit.commit();
 	}
 }

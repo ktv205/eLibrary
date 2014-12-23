@@ -1,25 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linear_auth_fragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/authentication_textview_happy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:text="@string/string_happy"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/blue" />
+
+    <TextView
+        android:id="@+id/authentication_textview_reading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/authentication_textview_happy"
+        android:layout_centerHorizontal="true"
+        android:text="@string/string_Reading"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/blue" />
 
     <Button
         android:id="@+id/signup_button_authentication_fragment"
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="@string/signup_string" />
-
-    <TextView
-        android:id="@+id/or_textview_authentication_fragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/or_string" />
+        android:layout_centerInParent="true"
+        android:background="@xml/mybutton"
+        android:padding="10dp"
+        android:text="@string/signup_string"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
 
     <Button
         android:id="@+id/signin_button_authentication_fragment"
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="@string/signin_string" />
-</LinearLayout>
+        android:layout_below="@+id/signup_button_authentication_fragment"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="20dp"
+        android:background="@xml/mybutton"
+        android:padding="10dp"
+        android:text="@string/signin_string"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
+
+</RelativeLayout>

@@ -60,7 +60,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			parentLinear = new LinearLayout(this);
 			parentLinear.setOrientation(LinearLayout.VERTICAL);
 			scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
-
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
 				fetchData();
@@ -215,7 +214,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			startActivity(new Intent(this, Friends.class));
 		} else if (id == R.id.setting_test) {
 			new TestAsyncTask().execute(getParams());
-            
+
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -265,14 +264,16 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		Log.d(TAG, "getParams()");
 		RequestParams params = new RequestParams();
 		params.setMethod("GET");
-		params.setURI("http://" + AppPreferences.ipAdd
-				+ "/eLibrary/lib/controllers/profile.php");
+		params.setURI("http://" + AppPreferences.ipAdd   
+				+ "/eLibrary/library/index.php/profile");
 		params.setParam("user_id", String.valueOf(authPref.getInt(
-				AppPreferences.Auth.KEY_PERSON_ID, -1)));
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("user", String.valueOf(authPref.getInt(AppPreferences.Auth.KEY_USERID,-1)));
+		params.setParam("mobile", "1");
 		Log.d(TAG,
 				"user_id->"
 						+ authPref
-								.getInt(AppPreferences.Auth.KEY_PERSON_ID, -1));
+								.getInt(AppPreferences.Auth.KEY_USERID, -1));
 		return params;
 	}
 
@@ -284,46 +285,48 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 		@Override
 		protected String doInBackground(RequestParams... params) {
-			URL url = null;
-			try {
-				url = new URL(params[0].getURI() + "?"
-						+ params[0].getEncodedParams());
-				Log.d(TAG, "In background->" + params[0].getURI() + "?"
-						+ params[0].getEncodedParams());
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			}
-			HttpURLConnection con = null;
-			try {
-				con = (HttpURLConnection) url.openConnection();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			StringBuilder builder = new StringBuilder();
-			String line = null;
-			InputStreamReader reader = null;
-			try {
-				reader = new InputStreamReader(con.getInputStream());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			BufferedReader buffer = null;
-			buffer = new BufferedReader(reader);
-			try {
-				line = buffer.readLine();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			while (line != null) {
-				builder.append(line);
-				try {
-					line = buffer.readLine();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			Log.d(TAG, "builder->" + builder.toString());
-			return builder.toString();
+
+			// URL url = null;
+			// try {
+			// url = new URL(params[0].getURI() + "?"
+			// + params[0].getEncodedParams());
+			// Log.d(TAG, "In background->" + params[0].getURI() + "?"
+			// + params[0].getEncodedParams());
+			// } catch (MalformedURLException e) {
+			// e.printStackTrace();
+			// }
+			// HttpURLConnection con = null;
+			// try {
+			// con = (HttpURLConnection) url.openConnection();
+			// } catch (IOException e) {
+			// e.printStackTrace();
+			// }
+			// StringBuilder builder = new StringBuilder();
+			// String line = null;
+			// InputStreamReader reader = null;
+			// try {
+			// reader = new InputStreamReader(con.getInputStream());
+			// } catch (IOException e) {
+			// e.printStackTrace();
+			// }
+			// BufferedReader buffer = null;
+			// buffer = new BufferedReader(reader);
+			// try {
+			// line = buffer.readLine();
+			// } catch (IOException e) {
+			// e.printStackTrace();
+			// }
+			// while (line != null) {
+			// builder.append(line);
+			// try {
+			// line = buffer.readLine();
+			// } catch (IOException e) {
+			// e.printStackTrace();
+			// }
+			// }
+			// Log.d(TAG, "builder->" + builder.toString());
+			
+			return new HttpManager().sendUserData(params[0]);
 		}
 
 		@Override

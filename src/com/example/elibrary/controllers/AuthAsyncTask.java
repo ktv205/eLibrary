@@ -100,7 +100,7 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 			if (obj.getInt("success") == 1) {
 				user_id = obj.getInt("user_id");
 				Log.d(TAG, "user_id->" + user_id);
-				edit.putInt(AppPreferences.Auth.KEY_PERSON_ID, user_id);
+				edit.putInt(AppPreferences.Auth.KEY_USERID, user_id);
 				edit.commit();
 				return user_id;
 			} else {
