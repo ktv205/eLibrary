@@ -633,7 +633,7 @@ int id email_edittext_signup 0x7f0c0074
 int id end 0x7f0c002d
 int id expand_activities_button 0x7f0c003e
 int id expanded_menu 0x7f0c0044
-int id fragment_page_textview 0x7f0c00aa
+int id fragment_page_webview 0x7f0c00aa
 int id friends_listview_friends 0x7f0c005d
 int id grayscale 0x7f0c001b
 int id holo_dark 0x7f0c000e

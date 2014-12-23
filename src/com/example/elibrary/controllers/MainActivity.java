@@ -495,9 +495,10 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			result = getResizedBitmap(result, 300, 300);
-			view.setImageBitmap(result);
-
+			if (result != null) {
+				result = getResizedBitmap(result, 300, 300);
+				view.setImageBitmap(result);
+			}
 		}
 	}
 
@@ -521,6 +522,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		protected void onPostExecute(String result) {
 			dialog.dismiss();
 			Log.d(TAG, "result->" + result);
+			Intent intent=new Intent(MainActivity.this, Book.class);
+			intent.putExtra("book", result);
+			MainActivity.this.startActivity(intent);
 
 		}
 

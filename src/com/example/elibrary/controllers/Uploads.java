@@ -152,19 +152,21 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				R.layout.inflate_single_category, null, false);
 		TextView textView = (TextView) singleCategory
 				.findViewById(R.id.single_category_textview_book_category);
-		Log.d(TAG,"category in fill books->"+"My Upload History");
+		Log.d(TAG, "category in fill books->" + "My Upload History");
 		textView.setText("Uploads");
 		LinearLayout horizontal = (LinearLayout) singleCategory
 				.findViewById(R.id.single_category_linearlayout_horizontal);
 
 		for (int j = 0; j < libraryModel.size(); j++) {
-			View singleBook = mInflater.inflate(
-					R.layout.inflate_singlebook, null, false);
+			final int finalJ = j;
+			View singleBook = mInflater.inflate(R.layout.inflate_singlebook,
+					null, false);
 			ImageView imageView = (ImageView) singleBook
 					.findViewById(R.id.single_book_cover);
 			// imageView.setImageBitmap(profile.getTypes().get("uploads")
 			// .get(j).getImagebitmap());
-			new BitmapAsyncTask(imageView).execute(libraryModel.get(j).getProfilePic());
+			new BitmapAsyncTask(imageView).execute(libraryModel.get(j)
+					.getProfilePic());
 			TextView titleTextView = (TextView) singleBook
 					.findViewById(R.id.single_book_name);
 			TextView authorTextView = (TextView) singleBook
@@ -178,8 +180,9 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 
 				@Override
 				public void onClick(View v) {
-					startActivity(new Intent(Uploads.this, Book.class));
-
+					// startActivity(new Intent(Uploads.this, Book.class));
+					new BookPagesAsyncTask().execute(getBookPagesParams(String
+							.valueOf(libraryModel.get(finalJ).getBookId())));
 				}
 			});
 			horizontal.addView(singleBook);
@@ -387,6 +390,19 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		}
 	}
 
+	public RequestParams getBookPagesParams(String id) {
+		RequestParams params = new RequestParams();
+		params.setMethod("GET");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/book");
+		params.setParam("book_id", id);
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("mobile", "1");
+		return params;
+
+	}
+
 	public String makeFile(String name, Intent intent) {
 		String PathToDir = Environment.getExternalStorageDirectory()
 				.getAbsolutePath() + "/" + "elibrary";
@@ -518,7 +534,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 
 		public void getBooksInfo(JSONArray array,
@@ -557,9 +573,10 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            fillBooks();
+			fillBooks();
 		}
 	}
+
 	public class BitmapAsyncTask extends AsyncTask<String, Void, Bitmap> {
 		MyHolder holder;
 		LibraryModel model;
@@ -611,10 +628,38 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			result=getResizedBitmap(result, 300, 300);
+			result = getResizedBitmap(result, 300, 300);
 			view.setImageBitmap(result);
 
 		}
+	}
+
+	public class BookPagesAsyncTask extends
+			AsyncTask<RequestParams, Void, String> {
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(Uploads.this);
+			dialog.show();
+		}
+
+		@Override
+		protected String doInBackground(RequestParams... params) {
+			// TODO Auto-generated method stub
+			return new HttpManager().sendUserData(params[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			dialog.dismiss();
+			Log.d(TAG, "result->" + result);
+			Intent intent = new Intent(Uploads.this, Book.class);
+			intent.putExtra("book", result);
+			Uploads.this.startActivity(intent);
+
+		}
+
 	}
 
 }

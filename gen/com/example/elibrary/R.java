@@ -2397,7 +2397,7 @@ containing a value of this type.
         public static final int end=0x7f0c002d;
         public static final int expand_activities_button=0x7f0c003e;
         public static final int expanded_menu=0x7f0c0044;
-        public static final int fragment_page_textview=0x7f0c00aa;
+        public static final int fragment_page_webview=0x7f0c00aa;
         public static final int friends_listview_friends=0x7f0c005d;
         public static final int grayscale=0x7f0c001b;
         public static final int holo_dark=0x7f0c000e;

@@ -107,11 +107,12 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				Intent intent = new Intent(SearchActivity.this, Book.class);
+				//Intent intent = new Intent(SearchActivity.this, Book.class);
 				TextView bookId = (TextView) view
 						.findViewById(R.id.contents_list_books_search_textview_bookid);
-				intent.putExtra("book_id", bookId.getText().toString());
-				startActivity(intent);
+				// intent.putExtra("book_id", bookId.getText().toString());
+				// startActivity(intent);
+				new BookPagesAsyncTask().execute(getBookPagesParams(bookId.getText().toString()));
 
 			}
 		});
@@ -338,6 +339,19 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			}
 
 		}
+	}
+
+	public RequestParams getBookPagesParams(String id) {
+		RequestParams params = new RequestParams();
+		params.setMethod("GET");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/book");
+		params.setParam("book_id", id);
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("mobile", "1");
+		return params;
+
 	}
 
 	public class BookSearchAsyncTask extends
@@ -596,6 +610,34 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 	public void onCleardFields(boolean cleared) {
 		if (cleared) {
 			logout();
+		}
+
+	}
+
+	public class BookPagesAsyncTask extends
+			AsyncTask<RequestParams, Void, String> {
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(SearchActivity.this);
+			dialog.show();
+		}
+
+		@Override
+		protected String doInBackground(RequestParams... params) {
+			// TODO Auto-generated method stub
+			return new HttpManager().sendUserData(params[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			dialog.dismiss();
+			Log.d(TAG, "result->" + result);
+			Intent intent = new Intent(SearchActivity.this, Book.class);
+			intent.putExtra("book", result);
+			SearchActivity.this.startActivity(intent);
+
 		}
 
 	}

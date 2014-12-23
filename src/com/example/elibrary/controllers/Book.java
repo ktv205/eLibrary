@@ -1,5 +1,10 @@
 package com.example.elibrary.controllers;
 
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.example.elibrary.R;
 
 import android.annotation.SuppressLint;
@@ -25,7 +30,7 @@ public class Book extends FragmentActivity {
 	private Context context;
 	private LayoutInflater mInflater;
 	private static int ADDFAV = 0;
-
+	private ArrayList<String> pages=new ArrayList<String>();
 	@Override
 	protected void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
@@ -37,6 +42,32 @@ public class Book extends FragmentActivity {
 		if (CheckConnection.isConnected(context)) {
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
+				Intent intent=getIntent();
+				if(intent.hasExtra("book")){
+					String result=intent.getExtras().getString("book");
+					
+					try {
+						JSONObject mainObject=new JSONObject(result);
+						int success=mainObject.getInt("success");
+						if(success==1){
+							JSONObject pageObject=mainObject.getJSONObject("page");
+							int j=1;
+							while(j!=-1){
+								if(pageObject.has(String.valueOf(j))){
+									pages.add("http://54.174.223.185/eLibrary/library/"+pageObject.getString(String.valueOf(j)));
+									j++;
+								}else{
+									j=-1;
+								}
+							}
+							count=pages.size();
+						}
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
 				MyViewPagerAdapter pagerAdaper = new MyViewPagerAdapter(
 						getSupportFragmentManager());
 				ViewPager viewPager = (ViewPager) findViewById(R.id.book_pager);
@@ -116,11 +147,11 @@ public class Book extends FragmentActivity {
 		public MyViewPagerAdapter(FragmentManager fm) {
 			super(fm);
 		}
-
+        
 		@Override
 		public Fragment getItem(int i) {
 			Bundle bundle = new Bundle();
-			bundle.putInt("test", i);
+			bundle.putString("page", pages.get(i));
 			PageFragment pageFragment = new PageFragment();
 			pageFragment.setArguments(bundle);
 			return pageFragment;

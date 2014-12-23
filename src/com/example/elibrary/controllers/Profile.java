@@ -217,6 +217,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				LinearLayout horizontal = (LinearLayout) singleCategory
 						.findViewById(R.id.single_category_linearlayout_horizontal);
 				for (int j = 0; j < profile.getTypes().get("uploads").size(); j++) {
+					final int finalJ = j;
 					View singleBook = mInflater.inflate(
 							R.layout.inflate_singlebook, null, false);
 					ImageView imageView = (ImageView) singleBook
@@ -241,8 +242,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 						@Override
 						public void onClick(View v) {
-							startActivity(new Intent(Profile.this, Book.class));
-
+							// startActivity(new Intent(Profile.this,
+							// Book.class));
+							new BookPagesAsyncTask()
+									.execute(getBookPagesParams(String
+											.valueOf(profile.getTypes()
+													.get("uploads").get(finalJ)
+													.getBookId())));
 						}
 					});
 					horizontal.addView(singleBook);
@@ -254,6 +260,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					LinearLayout horizontal = (LinearLayout) singleCategory
 							.findViewById(R.id.single_category_linearlayout_horizontal);
 					for (int j = 0; j < profile.getTypes().get("fav").size(); j++) {
+						final int finalJ = j;
 						View singleBook = mInflater.inflate(
 								R.layout.inflate_singlebook, null, false);
 						ImageView imageView = (ImageView) singleBook
@@ -278,9 +285,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 							@Override
 							public void onClick(View v) {
-								startActivity(new Intent(Profile.this,
-										Book.class));
-
+								// startActivity(new Intent(Profile.this,
+								// Book.class));
+								new BookPagesAsyncTask()
+										.execute(getBookPagesParams(String
+												.valueOf(profile.getTypes()
+														.get("fav").get(finalJ)
+														.getBookId())));
 							}
 						});
 						horizontal.addView(singleBook);
@@ -294,6 +305,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 							.findViewById(R.id.single_category_linearlayout_horizontal);
 					for (int j = 0; j < profile.getTypes().get("private")
 							.size(); j++) {
+						final int finalJ = j;
 						View singleBook = mInflater.inflate(
 								R.layout.inflate_singlebook, null, false);
 						ImageView imageView = (ImageView) singleBook
@@ -319,8 +331,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 							@Override
 							public void onClick(View v) {
-								startActivity(new Intent(Profile.this,
-										Book.class));
+								// startActivity(new Intent(Profile.this,
+								// Book.class));
+								new BookPagesAsyncTask()
+								.execute(getBookPagesParams(String
+										.valueOf(profile.getTypes()
+												.get("private").get(finalJ)
+												.getBookId())));
 
 							}
 						});
@@ -337,6 +354,19 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		parentScroll.removeAllViews();
 		parentScroll.addView(parentLinear);
 		setContentView(parentScroll);
+
+	}
+
+	public RequestParams getBookPagesParams(String id) {
+		RequestParams params = new RequestParams();
+		params.setMethod("GET");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/book");
+		params.setParam("book_id", id);
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("mobile", "1");
+		return params;
 
 	}
 
@@ -712,10 +742,39 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		protected String doInBackground(RequestParams... params) {
 			return new HttpManager().sendUserData(params[0]);
 		}
+
 		@Override
 		protected void onPostExecute(String result) {
-			Log.d(TAG,"result->"+result);
+			Log.d(TAG, "result->" + result);
 		}
 	}
-	
+
+	public class BookPagesAsyncTask extends
+			AsyncTask<RequestParams, Void, String> {
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(Profile.this);
+			dialog.show();
+		}
+
+		@Override
+		protected String doInBackground(RequestParams... params) {
+			// TODO Auto-generated method stub
+			return new HttpManager().sendUserData(params[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			dialog.dismiss();
+			Log.d(TAG, "result->" + result);
+			Intent intent = new Intent(Profile.this, Book.class);
+			intent.putExtra("book", result);
+			Profile.this.startActivity(intent);
+
+		}
+
+	}
+
 }

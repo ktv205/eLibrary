@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 public class PageFragment extends Fragment {
@@ -23,10 +24,10 @@ public class PageFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		Bundle bundle = getArguments();
-		int i = bundle.getInt("test");
-		TextView text = (TextView) view
-				.findViewById(R.id.fragment_page_textview);
-		text.setText("page number " + i);
+		String i = bundle.getString("page");
+		WebView text = (WebView) view
+				.findViewById(R.id.fragment_page_webview);
+		text.loadUrl(i);
 
 	}
 }
