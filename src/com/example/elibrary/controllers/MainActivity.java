@@ -80,7 +80,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
-			     new FetchBooksAsyncTask().execute(getParams());
+				new FetchBooksAsyncTask().execute(getParams());
 				// fetchData();
 				// fillWithBooks();
 			} else {
@@ -140,6 +140,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 					.findViewById(R.id.single_category_linearlayout_horizontal);
 
 			for (int j = 0; j < booksMap.get(key).size(); j++) {
+				final int id = booksMap.get(key).get(j).getBookId();
 				View singleBook = mInflater.inflate(
 						R.layout.inflate_singlebook, null, false);
 				ImageView imageView = (ImageView) singleBook
@@ -163,7 +164,11 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 					@Override
 					public void onClick(View v) {
-						startActivity(new Intent(MainActivity.this, Book.class));
+						Log.d(TAG, "bookid on click->" + id);
+						new BookPagesAsyncTask()
+								.execute(getBookPagesParams(String.valueOf(id)));
+						// startActivity(new Intent(MainActivity.this,
+						// Book.class));
 
 					}
 				});
@@ -305,9 +310,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	public RequestParams getParams() {
 		Log.d(TAG, "getParams()");
 		RequestParams params = new RequestParams();
-		params.setMethod("POST");
+		params.setMethod("GET");
 		params.setURI("http://" + AppPreferences.ipAdd
-				+ "/eLibrary/library/index.php/home ");
+				+ "/eLibrary/library/index.php/home");
 		params.setParam("user_id", String.valueOf(authPref.getInt(
 				AppPreferences.Auth.KEY_USERID, -1)));
 		params.setParam("mobile", "1");
@@ -315,6 +320,19 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 				"user_id->"
 						+ authPref.getInt(AppPreferences.Auth.KEY_USERID, -1));
 		return params;
+	}
+
+	public RequestParams getBookPagesParams(String id) {
+		RequestParams params = new RequestParams();
+		params.setMethod("GET");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/book");
+		params.setParam("book_id", id);
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("mobile", "1");
+		return params;
+
 	}
 
 	public class FetchBooksAsyncTask extends
@@ -336,27 +354,29 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		protected void onPostExecute(String result) {
 			dialog.dismiss();
 			Log.d(TAG, "onPostExecute->" + result);
-			// booksMap=new HashMap<String, ArrayList<LibraryModel>>();
-			// try {
-			// JSONObject mainObject=new JSONObject(result);
-			// int success=mainObject.getInt("success");
-			// Log.d(TAG,"success for getting json object->"+success);
-			// if(success==1){
-			// Log.d(TAG,"inside if success");
-			// JSONArray libraryArray=mainObject.getJSONArray("library");
-			// for(int i=0;i<libraryArray.length();i++){
-			// JSONObject booksObjectByCategory=libraryArray.getJSONObject(i);
-			// String genre=booksObjectByCategory.getString("genre");
-			// Log.d(TAG,"genre->"+genre);
-			// getBooksByCategory(genre, booksMap, booksObjectByCategory);
-			//
-			// }
-			// }
-			// } catch (JSONException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-			// fillWithBooks();
+			booksMap = new HashMap<String, ArrayList<LibraryModel>>();
+			try {
+				JSONObject mainObject = new JSONObject(result);
+				int success = mainObject.getInt("success");
+				Log.d(TAG, "success for getting json object->" + success);
+				if (success == 1) {
+					Log.d(TAG, "inside if success");
+					JSONArray libraryArray = mainObject.getJSONArray("library");
+					for (int i = 0; i < libraryArray.length(); i++) {
+						JSONObject booksObjectByCategory = libraryArray
+								.getJSONObject(i);
+						String genre = booksObjectByCategory.getString("genre");
+						Log.d(TAG, "genre->" + genre);
+						getBooksByCategory(genre, booksMap,
+								booksObjectByCategory);
+
+					}
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			fillWithBooks();
 		}
 
 		public void getBooksByCategory(String genre,
@@ -364,27 +384,57 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 				JSONObject booksObjectByCategory) {
 			ArrayList<LibraryModel> libraryModel = new ArrayList<LibraryModel>();
 			try {
-				JSONArray booksArray = booksObjectByCategory
-						.getJSONArray("books");
-				for (int i = 0; i < booksArray.length(); i++) {
-					JSONObject bookObject = booksArray.getJSONObject(i);
-					LibraryModel model = new LibraryModel();
-					model.setCategory(genre);
-					model.setBookAuthor(bookObject.getString("book_author"));
-					model.setBookId(Integer.valueOf(bookObject
-							.getString("book_id")));
-					model.setBookName(bookObject.getString("book_title"));
-					model.setIsbn(bookObject.getString("book_isbn"));
-					model.setAccess(bookObject.getInt("access"));
-					model.setProfilePic(bookObject.getString("book_pic"));
-					JSONObject userObject = bookObject
-							.getJSONObject("uploaded_by");
-					model.setUserName(userObject.getString("user_name"));
-					model.setUser_id(Integer.valueOf(userObject
-							.getString("user_id")));
-					libraryModel.add(model);
+				JSONObject booksObject = booksObjectByCategory
+						.getJSONObject("books");
+				int j = 0;
+				JSONObject bookObject = null;
+				while (j != -1) {
+					if (booksObject.isNull(String.valueOf(j))) {
+						Log.d(TAG, "null");
+						j = -1;
+					} else {
+						bookObject = booksObject.getJSONObject(String
+								.valueOf(j));
+
+						LibraryModel model = new LibraryModel();
+						model.setCategory(genre);
+						model.setBookAuthor(bookObject.getString("book_author"));
+						model.setBookId(Integer.valueOf(bookObject
+								.getString("book_id")));
+						model.setBookName(bookObject.getString("book_title"));
+						model.setIsbn(bookObject.getString("book_isbn"));
+						model.setAccess(bookObject.getInt("access"));
+						model.setProfilePic(bookObject.getString("book_pic"));
+						JSONObject userObject = bookObject
+								.getJSONObject("uploaded_by");
+						model.setUserName(userObject.getString("user_name"));
+						model.setUser_id(Integer.valueOf(userObject
+								.getString("user_id")));
+						libraryModel.add(model);
+						j++;
+					}
+
 				}
 				booksMap.put(genre, libraryModel);
+				// for (int i = 0; i < booksArray.length(); i++) {
+				// JSONObject bookObject = booksArray.getJSONObject(i);
+				// LibraryModel model = new LibraryModel();
+				// model.setCategory(genre);
+				// model.setBookAuthor(bookObject.getString("book_author"));
+				// model.setBookId(Integer.valueOf(bookObject
+				// .getString("book_id")));
+				// model.setBookName(bookObject.getString("book_title"));
+				// model.setIsbn(bookObject.getString("book_isbn"));
+				// model.setAccess(bookObject.getInt("access"));
+				// model.setProfilePic(bookObject.getString("book_pic"));
+				// JSONObject userObject = bookObject
+				// .getJSONObject("uploaded_by");
+				// model.setUserName(userObject.getString("user_name"));
+				// model.setUser_id(Integer.valueOf(userObject
+				// .getString("user_id")));
+				// libraryModel.add(model);
+				// }
+
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -449,5 +499,30 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			view.setImageBitmap(result);
 
 		}
+	}
+
+	public class BookPagesAsyncTask extends
+			AsyncTask<RequestParams, Void, String> {
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(MainActivity.this);
+			dialog.show();
+		}
+
+		@Override
+		protected String doInBackground(RequestParams... params) {
+			// TODO Auto-generated method stub
+			return new HttpManager().sendUserData(params[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			dialog.dismiss();
+			Log.d(TAG, "result->" + result);
+
+		}
+
 	}
 }

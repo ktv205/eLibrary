@@ -58,18 +58,19 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 	private static int who;
 	private LinearLayout parentLinear;
 	private ScrollView parentScroll;
-	private TextView nameTextView, emailTextView, booksUploadedTextView,titleTextView;
+	private TextView nameTextView, emailTextView, booksUploadedTextView,
+			titleTextView;
 	private Button friendButton;
 	private ImageView profilePicImageView;
 	private ProfileModel profile;
-	private int selfFlag=1;
+	private int selfFlag = 1;
 	private String to_user_id;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_profile);
-		Log.d(TAG,"onCreate");
+		Log.d(TAG, "onCreate");
 		context = getApplicationContext();
 		authPref = MySharedPreferences.getSharedPreferences(context,
 				AppPreferences.Auth.AUTHPREF);
@@ -89,16 +90,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 								.getExtras()
 								.getInt(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE);
 
-						
-						
 					}
-					if(intent.hasExtra("to_user_id")){
-						selfFlag=0;
-					    to_user_id=intent.getExtras().getString("to_user_id");
+					if (intent.hasExtra("to_user_id")) {
+						selfFlag = 0;
+						to_user_id = intent.getExtras().getString("to_user_id");
 					}
 					RequestParams params = getRequestParams();
 					new GetProfileAsyncTask().execute(params);
-					
 
 				}
 			} else {
@@ -115,8 +113,8 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		nameTextView = (TextView) findViewById(R.id.profile_textview_name);
 		emailTextView = (TextView) findViewById(R.id.profile_textview_email);
 		booksUploadedTextView = (TextView) findViewById(R.id.profile_textview_uploaded);
-		friendButton=(Button)findViewById(R.id.profile_button_friend);
-		titleTextView=(TextView)findViewById(R.id.profile_textview_title);
+		friendButton = (Button) findViewById(R.id.profile_button_friend);
+		titleTextView = (TextView) findViewById(R.id.profile_textview_title);
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
 				R.drawable.ic_launcher);
 		profilePicImageView = (ImageView) findViewById(R.id.profile_imageview_profilepic);
@@ -163,33 +161,50 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		} else {
 			rows = 2;
 		}
-		
-		if (who == AppPreferences.FRIEND || profile.getFriendship().equals("friends") ) {
-		   friendButton.setText("friends");
-		   titleTextView.setText("Library");
+
+		if (who == AppPreferences.FRIEND
+				|| profile.getFriendship().equals("friends")) {
+			friendButton.setText("friends");
+			titleTextView.setText("Library");
 			rows = 2;
-		} else if (who == AppPreferences.STRANGER || profile.getFriendship().equals("no")) {
+		} else if (who == AppPreferences.STRANGER
+				|| profile.getFriendship().equals("no")) {
 			friendButton.setText("add friend");
 			titleTextView.setText("Library");
 			rows = 2;
-		} else if (who == AppPreferences.SELF || profile.getFriendship().equals("self")) {
+		} else if (who == AppPreferences.SELF
+				|| profile.getFriendship().equals("self")) {
 			friendButton.setText("self");
 			titleTextView.setText("My Library");
 			rows = 3;
-		}else if(profile.getFriendship().equals("pending")){
+		} else if (profile.getFriendship().equals("pending")) {
 			friendButton.setText("pending");
+		} else if (profile.getFriendship().equals("withhelp")) {
+			friendButton.setText("respond to friend request");
 		}
 		friendButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-			   if(profile.getFriendship().equals("no")){
-				   friendButton.setText("pending");
-				   Toast.makeText(Profile.this, "friend request sent", Toast.LENGTH_SHORT).show();
-			   }
+				if (profile.getFriendship().equals("no")) {
+					friendButton.setText("pending");
+					Toast.makeText(Profile.this, "friend request sent",
+							Toast.LENGTH_SHORT).show();
+					new SendFriendRequestAsyncTask()
+							.execute(getFriendRequestParams("no",
+									String.valueOf(profile.getUser_id())));
+				} else if (profile.getFriendship().equals("withheld")) {
+					friendButton.setText("friends");
+					new SendFriendRequestAsyncTask()
+							.execute(getFriendRequestParams("withheld",
+									String.valueOf(profile.getUser_id())));
+					Toast.makeText(Profile.this, "you made a new friend",
+							Toast.LENGTH_SHORT).show();
+
+				}
 			}
 		});
-		
+
 		for (int i = 0; i < rows; i++) {
 			Log.d(TAG, "inside rows for loop");
 			View singleCategory = mInflater.inflate(
@@ -286,7 +301,8 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 						// imageView.setImageBitmap(profile.getTypes()
 						// .get("private").get(j).getImagebitmap());
 						new BitmapAsyncTask(imageView).execute(profile
-								.getTypes().get("private").get(j).getProfilePic());
+								.getTypes().get("private").get(j)
+								.getProfilePic());
 						TextView titleTextView = (TextView) singleBook
 								.findViewById(R.id.single_book_name);
 						TextView authorTextView = (TextView) singleBook
@@ -444,11 +460,33 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				+ "/eLibrary/library/index.php/profile");
 		params.setParam("user_id", String.valueOf(authPref.getInt(
 				AppPreferences.Auth.KEY_USERID, -1)));
-		if(selfFlag==1){
-		params.setParam("user", String.valueOf(authPref.getInt(
-				AppPreferences.Auth.KEY_USERID, -1)));
-		}else{
+		if (selfFlag == 1) {
+			params.setParam("user", String.valueOf(authPref.getInt(
+					AppPreferences.Auth.KEY_USERID, -1)));
+		} else {
 			params.setParam("user", to_user_id);
+		}
+		params.setParam("mobile", "1");
+		Log.d(TAG,
+				"user_id->"
+						+ authPref.getInt(AppPreferences.Auth.KEY_USERID, -1));
+		return params;
+
+	}
+
+	public RequestParams getFriendRequestParams(String response, String user_id) {
+		Log.d(TAG, "getParams()");
+		RequestParams params = new RequestParams();
+		params.setMethod("POST");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/friends");
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("user", user_id);
+		if (response.equals("withheld")) {
+			params.setParam("action", "accept_friend");
+		} else if (response.equals("no")) {
+			params.setParam("action", "add_friend");
 		}
 		params.setParam("mobile", "1");
 		Log.d(TAG,
@@ -543,7 +581,11 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				} else if (userObject.getString("friendship").equals("pending")) {
 					profile.setFriendship("pending");
 					Log.d(TAG, "friendship->" + profile.getFriendship());
-				}else{
+				} else if (userObject.getString("friendship")
+						.equals("withheld")) {
+					profile.setFriendship("withheld");
+					Log.d(TAG, "friendship->" + profile.getFriendship());
+				} else {
 					profile.setFriendship("no");
 				}
 			} catch (JSONException e) {
@@ -657,9 +699,23 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			result=getResizedBitmap(result, 300, 300);
+			result = getResizedBitmap(result, 300, 300);
 			view.setImageBitmap(result);
 
 		}
 	}
+
+	public class SendFriendRequestAsyncTask extends
+			AsyncTask<RequestParams, Void, String> {
+
+		@Override
+		protected String doInBackground(RequestParams... params) {
+			return new HttpManager().sendUserData(params[0]);
+		}
+		@Override
+		protected void onPostExecute(String result) {
+			Log.d(TAG,"result->"+result);
+		}
+	}
+	
 }

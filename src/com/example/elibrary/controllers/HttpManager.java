@@ -38,6 +38,7 @@ public class HttpManager {
 		try {
 			if (params.getMethod() == "GET") {
 				url = new URL(params.getURI() + "?" + params.getEncodedParams());
+				Log.d(TAG,params.getURI() + "?" + params.getEncodedParams());
 			} else {
 				url = new URL(params.getURI());
 			}

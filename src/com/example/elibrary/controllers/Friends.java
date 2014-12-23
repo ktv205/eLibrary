@@ -8,6 +8,10 @@ import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
@@ -242,6 +246,26 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		@Override
 		protected void onPostExecute(String result) {
 			Log.d(TAG,"result->"+result);
+			JSONObject mainObject;
+			try {
+				mainObject = new JSONObject(result);
+				int success=mainObject.getInt("success");
+				if(success==1){
+					JSONArray friendArray=mainObject.getJSONArray("friendlist");
+					int length=friendArray.length();
+					if(length==0){
+						TextView text=new TextView(Friends.this);
+						text.setText("No friends");
+						Friends.this.setContentView(text);
+						
+					}
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
 		}
 
 	}
