@@ -628,8 +628,10 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			result = getResizedBitmap(result, 300, 300);
-			view.setImageBitmap(result);
+			if (result != null) {
+				result = getResizedBitmap(result, 300, 300);
+				view.setImageBitmap(result);
+			}
 
 		}
 	}

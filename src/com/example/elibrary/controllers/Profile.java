@@ -334,10 +334,11 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 								// startActivity(new Intent(Profile.this,
 								// Book.class));
 								new BookPagesAsyncTask()
-								.execute(getBookPagesParams(String
-										.valueOf(profile.getTypes()
-												.get("private").get(finalJ)
-												.getBookId())));
+										.execute(getBookPagesParams(String
+												.valueOf(profile.getTypes()
+														.get("private")
+														.get(finalJ)
+														.getBookId())));
 
 							}
 						});
@@ -729,9 +730,10 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			result = getResizedBitmap(result, 300, 300);
-			view.setImageBitmap(result);
-
+			if (result != null) {
+				result = getResizedBitmap(result, 300, 300);
+				view.setImageBitmap(result);
+			}
 		}
 	}
 
