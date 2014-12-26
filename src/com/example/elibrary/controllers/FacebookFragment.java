@@ -15,12 +15,10 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +33,6 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.d(TAG, "in onCreate");
 		super.onCreate(savedInstanceState);
 		uiHelper = new UiLifecycleHelper(getActivity(), callback);
 		uiHelper.onCreate(savedInstanceState);
@@ -44,7 +41,6 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.d(TAG, "in onCreateView");
 		View view = inflater.inflate(R.layout.fragment_facebook, container,
 				false);
 		LoginButton authButton = (LoginButton) view
@@ -52,20 +48,18 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 		authButton.setReadPermissions(Arrays.asList("user_location",
 				"user_birthday", "user_likes", "email"));
 		authButton.setFragment(this);
-
+		authPref = MySharedPreferences.getSharedPreferences(getActivity(),
+				AppPreferences.Auth.AUTHPREF);
+		edit = authPref.edit();
 		return view;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		Bundle bundle = new Bundle();
-		bundle = getArguments();
-		if (bundle.getInt(AppPreferences.AUTH_KEY) == AppPreferences.SIGNIN) {
-			Log.d(TAG, "in onActivityCreated if user selected signin");
+		if (authPref.getInt(AppPreferences.AUTH_KEY, -1) == AppPreferences.SIGNIN) {
 			signup = false;
-		} else if (getArguments().getInt(AppPreferences.AUTH_KEY) == AppPreferences.SIGNUP) {
-			Log.d(TAG, "in onActivityCreated if user selected signup");
+		} else if (authPref.getInt(AppPreferences.AUTH_KEY, -1) == AppPreferences.SIGNUP) {
 			signup = true;
 		}
 	}
@@ -75,9 +69,7 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 			Exception exception) {
 		if (state.isOpened()) {
 			Request.executeMeRequestAsync(session, this);
-			Log.i(TAG, "Logged in...");
 		} else if (state.isClosed()) {
-			Log.i(TAG, "Logged out...");
 		}
 	}
 
@@ -86,7 +78,6 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 		@Override
 		public void call(Session session, SessionState state,
 				Exception exception) {
-			// TODO Auto-generated method stub
 
 		}
 	};
@@ -145,20 +136,13 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 
 	public void setSharedPreferences(String name, String email, String id,
 			String imageUri, int auth) {
-		authPref = getSharedPreferences(getActivity(),
-				AppPreferences.Auth.AUTHPREF);
-		edit = authPref.edit();
+		
 		edit.putString(AppPreferences.Auth.KEY_NAME, name);
 		edit.putString(AppPreferences.Auth.KEY_EMAIL, email);
 		edit.putString(AppPreferences.Auth.KEY_GOOGLEID, id);
 		edit.putInt(AppPreferences.Auth.KEY_AUTH, auth);
 		edit.putString(AppPreferences.Auth.KEY_PICTURE, imageUri);
 		edit.commit();
-	}
-
-	public SharedPreferences getSharedPreferences(Context context, String name) {
-		return context.getSharedPreferences(name, Context.MODE_PRIVATE);
-
 	}
 
 	public void setUserModel(String name, String email, String imageUri) {
@@ -179,11 +163,11 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 		if (signup) {
 			params.setParam("user_name", user.getName());
 			params.setURI("http://" + AppPreferences.ipAdd
-					+ "/eLibrary/lib/includes/register.inc.php");
+					+ "/eLibrary/library/index.php/welcome/sign_up");
 			params.setParam("user_pic", user.getProfilePic());
 		} else {
 			params.setURI("http://" + AppPreferences.ipAdd
-					+ "/eLibrary/lib/includes/process_login.php");
+					+ "/eLibrary/library/index.php/welcome/process_login");
 
 		}
 		return params;

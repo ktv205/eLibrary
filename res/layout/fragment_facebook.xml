@@ -1,15 +1,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     tools:context="com.example.facebookauth.MainActivity" >
 
     <com.facebook.widget.LoginButton
+        xmlns:fb="http://schemas.android.com/apk/res-auto"
         android:id="@+id/login_button_facebook_fragment"
+        style="@style/FacebookLoginButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_width="match_parent"
-        android:text="signup with facebook"
-        android:layout_height="wrap_content" />
+        fb:login_text=""
+        fb:logout_text="" />
 
 </RelativeLayout>

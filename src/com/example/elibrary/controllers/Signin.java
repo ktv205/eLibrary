@@ -9,13 +9,12 @@ import com.example.elibrary.models.RequestParams;
 import com.example.elibrary.models.UserModel;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,7 +23,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Signin extends Activity implements OnClickListener {
+public class Signin extends FragmentActivity implements OnClickListener {
 	private EditText email_edittext, password_edittext;
 	private TextView forgot_textview;
 	private Button submit;
@@ -43,18 +42,17 @@ public class Signin extends Activity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_signin);
-		Log.d(TAG, "onCreate");
 		context = getApplicationContext();
 		authPref = MySharedPreferences.getSharedPreferences(context,
 				AppPreferences.Auth.AUTHPREF);
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (CheckConnection.isConnected(context)) {
-			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 
 			} else {
 				initialize();
+
 			}
 
 		} else {
@@ -64,7 +62,6 @@ public class Signin extends Activity implements OnClickListener {
 	}
 
 	public void initialize() {
-		Log.d(TAG, "initialize()");
 		email_edittext = (EditText) findViewById(R.id.email_edittext_signin);
 		password_edittext = (EditText) findViewById(R.id.password_edittext_signin);
 		submit = (Button) findViewById(R.id.signin_button_signin);
@@ -134,11 +131,11 @@ public class Signin extends Activity implements OnClickListener {
 	public RequestParams setParams() {
 		RequestParams params = new RequestParams();
 		params.setURI("http://" + AppPreferences.ipAdd
-				+ "/eLibrary/lib/includes/process_login.php");
+				+ "/eLibrary/library/index.php/welcome/process_login");
 		params.setMethod("POST");
 		params.setParam("user_email", user.getEmail());
 		params.setParam("password", user.getPassword());
-		params.setParam("user_auth",user.getAuth());
+		params.setParam("user_auth", user.getAuth());
 		params.setParam("mobile", "1");
 		return params;
 
@@ -148,11 +145,10 @@ public class Signin extends Activity implements OnClickListener {
 	protected void onResume() {
 		super.onResume();
 		if (CheckConnection.isConnected(context)) {
-			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 
 			} else {
-				
+
 			}
 
 		} else {
@@ -172,18 +168,16 @@ public class Signin extends Activity implements OnClickListener {
 
 		@Override
 		protected String doInBackground(RequestParams... params) {
-			// TODO Auto-generated method stub
-			//return new HttpManager().sendUserData(params[0]);
-			return HttpManager.hitTheServer(params[0]);
+			return new HttpManager().sendUserData(params[0]);
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
-			Log.d(TAG, "postExecute");
 			String[] details = parseJsonObject(result);
 			if (details != null) {
 				user.setUser_id(Integer.valueOf(details[0]));
 				user.setName(details[1]);
+				user.setProfilePic(details[2]);
 				setSharedPreferences();
 				startActivity(new Intent(Signin.this, MainActivity.class));
 				finish();
@@ -193,20 +187,16 @@ public class Signin extends Activity implements OnClickListener {
 	}
 
 	public String[] parseJsonObject(String result) {
-		Log.d(TAG, "parseJsonObject");
 		JSONObject obj = null;
 		try {
 			obj = new JSONObject(result);
 			if (obj.getInt("success") == 1) {
-				Log.d(TAG, "obj.getInt(success)==1");
 				return new String[] { String.valueOf(obj.getInt("user_id")),
-						obj.getString("user_name") };
+						obj.getString("user_name"), obj.getString("user_pic") };
 			} else {
-				Log.d(TAG, "login failed in parseObject");
 				return null;
 			}
 		} catch (JSONException e) {
-			Log.d(TAG, "login failed in parseObject in catch");
 			e.printStackTrace();
 			return null;
 		}
@@ -214,15 +204,24 @@ public class Signin extends Activity implements OnClickListener {
 	}
 
 	public void setSharedPreferences() {
-		Log.d(TAG, "setSharedPreferences");
 		edit = authPref.edit();
-		Log.d(TAG, "Name in signIn->" + user.getName());
 		edit.putString(AppPreferences.Auth.KEY_NAME, user.getName());
 		edit.putString(AppPreferences.Auth.KEY_EMAIL, user.getEmail());
 		edit.putInt(AppPreferences.Auth.KEY_AUTH,
 				AppPreferences.Auth.EMAIL_AUTH);
 		edit.putInt(AppPreferences.Auth.KEY_USERID, user.getUser_id());
-		Log.d(TAG,"userId->"+user.getUser_id());
+		edit.putString(AppPreferences.Auth.KEY_PICTURE, user.getProfilePic());
 		edit.commit();
+	}
+
+	@Override
+	protected void onActivityResult(int REQUEST_CODE, int RESPONSE_CODE,
+			Intent data) {
+		if (REQUEST_CODE == AppPreferences.Codes.RC_SIGN_IN) {
+			GoogleFragment fragment = (GoogleFragment) getSupportFragmentManager()
+					.findFragmentById(R.id.signin_fragment_google);
+			fragment.onActivityResult(REQUEST_CODE, RESPONSE_CODE, data);
+		}
+		super.onActivityResult(REQUEST_CODE, RESPONSE_CODE, data);
 	}
 }

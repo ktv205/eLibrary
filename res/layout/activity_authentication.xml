@@ -1,9 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linear_authentication"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/book1" >
+    android:background="@drawable/book1"
+    android:orientation="vertical" >
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/authentication_textview_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:textSize="75sp"
+        android:textColor="@color/red"
+        android:text="@string/string_title"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <LinearLayout
+        android:id="@+id/authentication_linear_authbuttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" >
+
+        <Button
+            android:id="@+id/authentication_button_signup"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/signup_string"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:background="@color/darkred"
+            android:textColor="#FFFFFF"
+            style="?android:attr/buttonBarButtonStyle" >
+        </Button>
+
+        <Button
+            android:id="@+id/authentication_button_signin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/blue"
+            android:text="@string/signin_string"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#FFFFFF" 
+            style="?android:attr/buttonBarButtonStyle">
+        </Button>
+    </LinearLayout>
+
+</RelativeLayout>

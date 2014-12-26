@@ -96,5 +96,37 @@
             android:layout_marginTop="100dp"
             android:textColor="#FFFFFF" />
     </RelativeLayout>
+     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/string_existing_text" />
+
+    <RelativeLayout
+        android:id="@+id/signin_relative_social"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <fragment
+            android:id="@+id/signup_fragment_facebook"
+            android:name="com.example.elibrary.controllers.FacebookFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             android:layout_centerInParent="true"
+            android:layout_marginTop="10dp" />
+
+        <fragment
+            android:id="@+id/signup_fragment_google"
+            android:name="com.example.elibrary.controllers.GoogleFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@id/signup_fragment_facebook"
+            android:layout_toLeftOf="@id/signup_fragment_facebook" />
+    </RelativeLayout>
 
 </LinearLayout>

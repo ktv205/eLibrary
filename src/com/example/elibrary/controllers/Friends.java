@@ -69,9 +69,9 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		if (CheckConnection.isConnected(context)) {
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
-				//trainingSet();
+				trainingSet();
 				setMenuName();
-				new FriendsAsyncTask().execute(getRequestParams());
+				//new FriendsAsyncTask().execute(getRequestParams());
 			} else {
 				logout();
 			}

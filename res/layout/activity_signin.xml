@@ -60,12 +60,45 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:text="@string/signin_string"
-            android:background="@xml/mybutton"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:layout_marginRight="40dp"
             android:layout_marginEnd="40dp"
+            android:layout_marginRight="40dp"
+            android:background="@xml/mybutton"
+            android:text="@string/signin_string"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="#FFFFFF" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:text="@string/string_existing_text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <RelativeLayout
+        android:id="@+id/signin_relative_social"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <fragment
+            android:id="@+id/signin_fragment_facebook"
+            android:name="com.example.elibrary.controllers.FacebookFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="10dp" />
+
+        <fragment
+            android:id="@+id/signin_fragment_google"
+            android:name="com.example.elibrary.controllers.GoogleFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="6dp"
+            android:layout_toLeftOf="@id/signin_fragment_facebook"
+            android:layout_toStartOf="@id/signin_fragment_facebook" />
     </RelativeLayout>
 
 </LinearLayout>

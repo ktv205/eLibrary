@@ -1,11 +1,8 @@
 package com.example.elibrary.controllers;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +17,6 @@ import org.json.JSONObject;
 import com.example.elibrary.R;
 import com.example.elibrary.controllers.Friends.FriendsListAdapter.MyHolder;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
-import com.example.elibrary.controllers.Profile.BitmapAsyncTask;
 import com.example.elibrary.models.AppPreferences;
 import com.example.elibrary.models.LibraryModel;
 import com.example.elibrary.models.RequestParams;
@@ -38,7 +34,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.LiveFolders;
 import android.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -327,9 +322,10 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		params.setMethod("GET");
 		params.setURI("http://" + AppPreferences.ipAdd
 				+ "/eLibrary/library/index.php/book");
-		params.setParam("book_id", id);
+		params.setParam("book_id", "39");
 		params.setParam("user_id", String.valueOf(authPref.getInt(
 				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("page_no", "1");
 		params.setParam("mobile", "1");
 		return params;
 
@@ -416,24 +412,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 				}
 				booksMap.put(genre, libraryModel);
-				// for (int i = 0; i < booksArray.length(); i++) {
-				// JSONObject bookObject = booksArray.getJSONObject(i);
-				// LibraryModel model = new LibraryModel();
-				// model.setCategory(genre);
-				// model.setBookAuthor(bookObject.getString("book_author"));
-				// model.setBookId(Integer.valueOf(bookObject
-				// .getString("book_id")));
-				// model.setBookName(bookObject.getString("book_title"));
-				// model.setIsbn(bookObject.getString("book_isbn"));
-				// model.setAccess(bookObject.getInt("access"));
-				// model.setProfilePic(bookObject.getString("book_pic"));
-				// JSONObject userObject = bookObject
-				// .getJSONObject("uploaded_by");
-				// model.setUserName(userObject.getString("user_name"));
-				// model.setUser_id(Integer.valueOf(userObject
-				// .getString("user_id")));
-				// libraryModel.add(model);
-				// }
 
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block

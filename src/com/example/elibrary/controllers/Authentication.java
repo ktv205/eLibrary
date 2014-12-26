@@ -1,105 +1,81 @@
 package com.example.elibrary.controllers;
 
 import com.example.elibrary.R;
-import com.example.elibrary.controllers.AuthenticationFragment.OnClickAuthentication;
-import com.example.elibrary.controllers.EmailFragment.OnClickEmailSignup;
 import com.example.elibrary.models.AppPreferences;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-//import android.widget.LinearLayout;
 
-public class Authentication extends FragmentActivity implements
-		OnClickAuthentication, OnClickEmailSignup {
-	private int fragmentFlag = 0;
-	private FragmentManager fragmentManager;
-	private FragmentTransaction fragmentTransaction;
+public class Authentication extends Activity{
 	private static final String TAG = "Authentication";
 	private Context context;
 	private LayoutInflater mInflater;
+	private SharedPreferences authPref;
+	private SharedPreferences.Editor edit;
 
-	// private LinearLayout authLinear;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_authentication);
-		// authLinear=(LinearLayout)findViewById(R.id.linear_authentication);
-		Log.d(TAG, "in onCreate");
 		context = getApplicationContext();
+		authPref = MySharedPreferences.getSharedPreferences(context,
+				AppPreferences.Auth.AUTHPREF);
+		edit = authPref.edit();
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (CheckConnection.isConnected(context)) {
-			fragmentManager = getSupportFragmentManager();
-			fragmentTransaction = fragmentManager.beginTransaction();
-			AuthenticationFragment fragment = new AuthenticationFragment();
-			fragmentTransaction.add(R.id.linear_authentication, fragment,
-					AppPreferences.AUTH_TAG);
-			fragmentTransaction.commit();
-			fragmentFlag = 1;
-		}
-	}
+			Button signInButton = (Button) findViewById(R.id.authentication_button_signin);
+			Button signUpButton = (Button) findViewById(R.id.authentication_button_signup);
+			signInButton.setOnClickListener(new OnClickListener() {
 
-	@Override
-	public void onClickAuthButton(int flag) {
-		Bundle bundle = new Bundle();
-		if (flag == AppPreferences.SIGNIN) {
-			bundle.putInt(AppPreferences.AUTH_KEY, AppPreferences.SIGNIN);
+				@Override
+				public void onClick(View v) {
+					Intent intent = new Intent(Authentication.this,
+							Signin.class);
+					intent.putExtra(AppPreferences.AUTH_KEY,
+							AppPreferences.SIGNIN);
+					edit.putInt(AppPreferences.AUTH_KEY, AppPreferences.SIGNIN);
+					edit.commit();
+					startActivity(intent);
+
+				}
+			});
+			signUpButton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					Intent intent = new Intent(Authentication.this,
+							Signup.class);
+					intent.putExtra(AppPreferences.AUTH_KEY,
+							AppPreferences.SIGNUP);
+					edit.putInt(AppPreferences.AUTH_KEY, AppPreferences.SIGNUP);
+					edit.commit();
+					startActivity(intent);
+
+				}
+			});
 		} else {
-			bundle.putInt(AppPreferences.AUTH_KEY, AppPreferences.SIGNUP);
+			noConnectionView();
 		}
-		Log.d(TAG, "in onClickAuthButton->" + flag);
-		fragmentTransaction = fragmentManager.beginTransaction();
-		Fragment fragment = getSupportFragmentManager().findFragmentByTag(
-				AppPreferences.AUTH_TAG);
-		fragmentTransaction.remove(fragment);
-		FacebookFragment fb = new FacebookFragment();
-		GoogleFragment g = new GoogleFragment();
-		EmailFragment emailFragment = new EmailFragment();
-		fb.setArguments(bundle);
-		fragmentTransaction.add(R.id.linear_authentication, fb,
-				AppPreferences.FB_TAG);
-		// fragmentTransaction.commit();
-		// fragmentTransaction=fragmentManager.beginTransaction();
-		g.setArguments(bundle);
-		fragmentTransaction.add(R.id.linear_authentication, g,
-				AppPreferences.G_TAG);
-		// fragmentTransaction.commit();
-
-		// fragmentTransaction = fragmentManager.beginTransaction();
-		emailFragment.setArguments(bundle);
-		fragmentTransaction.add(R.id.linear_authentication, emailFragment,
-				AppPreferences.EMAIL_TAG);
-		fragmentTransaction.commit();
-		fragmentFlag = 2;
-
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.d(TAG, "onResume" + fragmentFlag);
 		if (CheckConnection.isConnected(context)) {
-			if (CheckAuthentication.checkForAuthentication(context)) {
-				startActivity(new Intent(this, MainActivity.class));
-				fragmentFlag = 1;
-				onBackPressed();
-			}
+               
 		} else {
 			noConnectionView();
 		}
-
 	}
 
 	@SuppressLint("InflateParams")
@@ -121,57 +97,7 @@ public class Authentication extends FragmentActivity implements
 	}
 
 	@Override
-	public void onClickSignupButton(int flag) {
-		Log.d(TAG, "inOnClickSignupButton");
-		Intent intent;
-		if (flag == AppPreferences.SIGNIN) {
-			intent = new Intent(this, Signin.class);
-			startActivity(intent);
-		} else {
-			intent = new Intent(this, Signup.class);
-			startActivity(intent);
-		}
-
-	}
-
-	@Override
-	protected void onActivityResult(int REQUEST_CODE, int RESPONSE_CODE,
-			Intent data) {
-		Log.d(TAG, "in onActivityResult");
-		// TODO Auto-generated method stub
-		if (REQUEST_CODE == AppPreferences.Codes.RC_SIGN_IN) {
-			Log.d(TAG, "Request code is for google plus login");
-			GoogleFragment fragment = (GoogleFragment) getSupportFragmentManager()
-					.findFragmentByTag(AppPreferences.G_TAG);
-			fragment.onActivityResult(REQUEST_CODE, RESPONSE_CODE, data);
-		}
-		super.onActivityResult(REQUEST_CODE, RESPONSE_CODE, data);
-	}
-
-	@Override
 	public void onBackPressed() {
-		Log.d(TAG, "onBackPressed->" + fragmentFlag);
-		if (fragmentFlag == 0 || fragmentFlag == 1) {
-			super.onBackPressed();
-		} else if (fragmentFlag == 2) {
-			fragmentManager = getSupportFragmentManager();
-			fragmentTransaction = fragmentManager.beginTransaction();
-			FacebookFragment fb = (FacebookFragment) getSupportFragmentManager()
-					.findFragmentByTag(AppPreferences.FB_TAG);
-			GoogleFragment g = (GoogleFragment) getSupportFragmentManager()
-					.findFragmentByTag(AppPreferences.G_TAG);
-			EmailFragment emailFragment = (EmailFragment) getSupportFragmentManager()
-					.findFragmentByTag(AppPreferences.EMAIL_TAG);
-			fragmentTransaction.remove(fb);
-			fragmentTransaction.remove(g);
-			fragmentTransaction.remove(emailFragment);
-			AuthenticationFragment fragment = new AuthenticationFragment();
-			fragmentTransaction.add(R.id.linear_authentication, fragment,
-					AppPreferences.AUTH_TAG);
-			fragmentTransaction.commit();
-			fragmentFlag = 1;
-
-		}
-
+		super.onBackPressed();
 	}
 }

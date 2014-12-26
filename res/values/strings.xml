@@ -46,6 +46,8 @@
     <string name="string_test">test response</string>
     <string name="string_happy">Happy</string>
     <string name="string_Reading">Reading</string>
+    <string name="string_existing_text">Use an existing account</string>
+    <string name="string_title">eLibrary</string>
     <string-array name="string_books_category">
         <item>biography</item>
     </string-array>

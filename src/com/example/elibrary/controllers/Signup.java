@@ -6,10 +6,11 @@ import com.example.elibrary.models.RequestParams;
 import com.example.elibrary.models.UserModel;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+//import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class Signup extends Activity implements OnClickListener {
+public class Signup extends FragmentActivity implements OnClickListener {
 	private EditText name_edittext, email_edittext, password_edittext,
 			reType_edittext;
 	private String name, email, password, reType;
@@ -33,6 +34,9 @@ public class Signup extends Activity implements OnClickListener {
 	private Context context;
 	private LayoutInflater mInflater;
 	private static final String TAG = "Signup";
+
+	// private Fragment fbFragment;
+	// private Fragment gFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +65,14 @@ public class Signup extends Activity implements OnClickListener {
 		reType_edittext = (EditText) findViewById(R.id.reenter_edittext_signup);
 		submit = (Button) findViewById(R.id.signup_button_signup);
 		submit.setOnClickListener(this);
+		// gFragment = getSupportFragmentManager().findFragmentById(
+		// R.id.signup_fragment_google);
+		// fbFragment = getSupportFragmentManager().findFragmentById(
+		// R.id.signup_fragment_facebook);
+		// Bundle bundle = new Bundle();
+		// bundle.putInt(AppPreferences.AUTH_KEY, AppPreferences.SIGNIN);
+		// gFragment.setArguments(bundle);
+		// fbFragment.setArguments(bundle);
 
 	}
 
@@ -132,7 +144,7 @@ public class Signup extends Activity implements OnClickListener {
 	public RequestParams setParams() {
 		RequestParams params = new RequestParams();
 		params.setURI("http://" + AppPreferences.ipAdd
-				+ "/eLibrary/lib/includes/register.inc.php");
+				+ "/eLibrary/library/index.php/welcome/sign_up");
 		params.setMethod("POST");
 		params.setParam("user_name", user.getName());
 		params.setParam("user_email", user.getEmail());
@@ -169,6 +181,19 @@ public class Signup extends Activity implements OnClickListener {
 		user.setEmail(email);
 		user.setPassword(password);
 		user.setAuth(AppPreferences.Auth.EMAIL_ENUM);
+	}
+	@Override
+	protected void onActivityResult(int REQUEST_CODE, int RESPONSE_CODE,
+			Intent data) {
+		Log.d(TAG, "in onActivityResult");
+		// TODO Auto-generated method stub
+		if (REQUEST_CODE == AppPreferences.Codes.RC_SIGN_IN) {
+			Log.d(TAG, "Request code is for google plus login");
+			GoogleFragment fragment = (GoogleFragment) getSupportFragmentManager()
+					.findFragmentById(R.id.signup_fragment_google);
+			fragment.onActivityResult(REQUEST_CODE, RESPONSE_CODE, data);
+		}
+		super.onActivityResult(REQUEST_CODE, RESPONSE_CODE, data);
 	}
 
 }

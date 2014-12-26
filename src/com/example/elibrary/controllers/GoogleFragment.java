@@ -1,5 +1,8 @@
 package com.example.elibrary.controllers;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.example.elibrary.R;
 import com.example.elibrary.models.AppPreferences;
 import com.example.elibrary.models.RequestParams;
@@ -49,25 +52,23 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.d(TAG, "in onCreateView");
 		view = inflater.inflate(R.layout.fragment_google, container, false);
 		mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
 				.addConnectionCallbacks(this)
 				.addOnConnectionFailedListener(this).addApi(Plus.API)
 				.addScope(Plus.SCOPE_PLUS_LOGIN).build();
+		authPref = MySharedPreferences.getSharedPreferences(getActivity(),
+				AppPreferences.Auth.AUTHPREF);
+		edit = authPref.edit();
 		return view;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		Bundle bundle = new Bundle();
-		bundle = getArguments();
-		if (bundle.getInt(AppPreferences.AUTH_KEY) == AppPreferences.SIGNIN) {
-			Log.d(TAG, "in onActivityCreated if user selected signin");
+		if (authPref.getInt(AppPreferences.AUTH_KEY, -1) == AppPreferences.SIGNIN) {
 			signup = false;
-		} else if (getArguments().getInt(AppPreferences.AUTH_KEY) == AppPreferences.SIGNUP) {
-			Log.d(TAG, "in onActivityCreated if user selected signup");
+		} else if (authPref.getInt(AppPreferences.AUTH_KEY, -1) == AppPreferences.SIGNUP) {
 			signup = true;
 		}
 		view.findViewById(R.id.login_button_google_fragment)
@@ -75,7 +76,6 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 					@Override
 					public void onClick(View v) {
-						Log.d(TAG, "in click listner");
 						if (!mGoogleApiClient.isConnecting()) {
 							mSignInClicked = true;
 							resolveSignInError();
@@ -131,7 +131,6 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 	@Override
 	public void onConnected(Bundle arg0) {
-		Log.d(TAG, "in onConnected");
 		mSignInClicked = false;
 		Person currentPerson = Plus.PeopleApi
 				.getCurrentPerson(mGoogleApiClient);
@@ -140,9 +139,18 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 		String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
 		Image picture = currentPerson.getImage();
 		String imageUri = picture.toString();
+		String imageLink = null;
+		try {
+			JSONObject object=new JSONObject(imageUri);
+			imageLink=object.getString("url");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		String id = currentPerson.getId();
-		setSharedPreferences(name, email, id, imageUri, auth);
-		setUserModel(name, email, imageUri);
+		setSharedPreferences(name, email, id, imageLink, auth);
+		setUserModel(name, email, imageLink);
 		RequestParams params = setParams();
 		sendDataToServer(params);
 	}
@@ -155,17 +163,13 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.d(TAG, "onActivityResult out side");
 		if (requestCode == AppPreferences.Codes.RC_SIGN_IN) {
-			Log.d(TAG, "onActivityResult RC_SIGN_IN");
 			if (resultCode != Activity.RESULT_OK) {
-				Log.d(TAG, "onActivityResult resultCode != Activity.RESULT_OK");
 				mSignInClicked = false;
 			}
 			mIntentInProgress = false;
 
 			if (!mGoogleApiClient.isConnecting()) {
-				Log.d("GoogleAuth", "!mGoogleApiClient.isConnecting()");
 				mGoogleApiClient.connect();
 			}
 		}
@@ -173,7 +177,6 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 	public void setSharedPreferences(String name, String email, String id,
 			String imageUri, int auth) {
-		Log.d(TAG, "in setSharedPreferences");
 		authPref = getSharedPreferences(getActivity(),
 				AppPreferences.Auth.AUTHPREF);
 		edit = authPref.edit();
@@ -192,7 +195,6 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 	}
 
 	public void setUserModel(String name, String email, String imageUri) {
-		Log.d(TAG, "setUserModel");
 		user = new UserModel();
 		user.setName(name);
 		user.setEmail(email);
@@ -202,21 +204,19 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 
 	public RequestParams setParams() {
 		RequestParams params = new RequestParams();
-
 		params.setMethod("POST");
-
 		params.setParam("user_email", user.getEmail());
 		params.setParam("user_auth", user.getAuth());
 		params.setParam("mobile", "1");
-		
+
 		if (signup) {
 			params.setParam("user_name", user.getName());
 			params.setURI("http://" + AppPreferences.ipAdd
-					+ "/eLibrary/lib/includes/register.inc.php");
+					+ "/eLibrary/library/index.php/welcome/sign_up");
 			params.setParam("user_pic", user.getProfilePic());
 		} else {
 			params.setURI("http://" + AppPreferences.ipAdd
-					+ "/eLibrary/lib/includes/process_login.php");
+					+ "/eLibrary/library/index.php/welcome/process_login");
 
 		}
 		return params;

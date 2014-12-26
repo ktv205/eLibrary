@@ -101,6 +101,7 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 				user_id = obj.getInt("user_id");
 				Log.d(TAG, "user_id->" + user_id);
 				edit.putInt(AppPreferences.Auth.KEY_USERID, user_id);
+				edit.putString(AppPreferences.Auth.KEY_PICTURE, obj.getString("user_pic"));
 				edit.commit();
 				return user_id;
 			} else {
@@ -119,7 +120,6 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 			Toast.makeText(context, obj.getString("error_msg"),
 					Toast.LENGTH_LONG).show();
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
