@@ -49,12 +49,9 @@ public class Signin extends FragmentActivity implements OnClickListener {
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (CheckConnection.isConnected(context)) {
 			if (CheckAuthentication.checkForAuthentication(context)) {
-
 			} else {
 				initialize();
-
 			}
-
 		} else {
 			noConnectionView();
 		}
@@ -160,7 +157,6 @@ public class Signin extends FragmentActivity implements OnClickListener {
 		user = new UserModel();
 		user.setEmail(email);
 		user.setPassword(password);
-		user.setAuth("gen");
 		user.setAuth(AppPreferences.Auth.EMAIL_ENUM);
 	}
 
@@ -177,11 +173,15 @@ public class Signin extends FragmentActivity implements OnClickListener {
 			if (details != null) {
 				user.setUser_id(Integer.valueOf(details[0]));
 				user.setName(details[1]);
-				user.setProfilePic(details[2]);
+				if (details.length > 2) {
+					user.setProfilePic(details[2]);
+				}
 				setSharedPreferences();
 				startActivity(new Intent(Signin.this, MainActivity.class));
 				finish();
-
+			} else {
+				Toast.makeText(Signin.this, "please try again",
+						Toast.LENGTH_LONG).show();
 			}
 		}
 	}
@@ -190,9 +190,21 @@ public class Signin extends FragmentActivity implements OnClickListener {
 		JSONObject obj = null;
 		try {
 			obj = new JSONObject(result);
-			if (obj.getInt("success") == 1) {
-				return new String[] { String.valueOf(obj.getInt("user_id")),
-						obj.getString("user_name"), obj.getString("user_pic") };
+			if (obj.has("success")) {
+				if (obj.getInt("success") == 1) {
+					if (obj.has("user_pic")) {
+						return new String[] {
+								String.valueOf(obj.getInt("user_id")),
+								obj.getString("user_name"),
+								obj.getString("user_pic") };
+					} else {
+						return new String[] {
+								String.valueOf(obj.getInt("user_id")),
+								obj.getString("user_name"), };
+					}
+				} else {
+					return null;
+				}
 			} else {
 				return null;
 			}
@@ -210,7 +222,10 @@ public class Signin extends FragmentActivity implements OnClickListener {
 		edit.putInt(AppPreferences.Auth.KEY_AUTH,
 				AppPreferences.Auth.EMAIL_AUTH);
 		edit.putInt(AppPreferences.Auth.KEY_USERID, user.getUser_id());
-		edit.putString(AppPreferences.Auth.KEY_PICTURE, user.getProfilePic());
+		if (user.getProfilePic() != null) {
+			edit.putString(AppPreferences.Auth.KEY_PICTURE,
+					user.getProfilePic());
+		}
 		edit.commit();
 	}
 

@@ -32,13 +32,11 @@ public class HttpManager {
 	private final static DefaultHttpClient httpClient = new DefaultHttpClient();
 
 	public String sendUserData(RequestParams params) {
-		Log.d(TAG, "sendUserData");
-		Log.d(TAG, params.getEncodedParams());
 		URL url = null;
 		try {
 			if (params.getMethod() == "GET") {
 				url = new URL(params.getURI() + "?" + params.getEncodedParams());
-				Log.d(TAG,params.getURI() + "?" + params.getEncodedParams());
+				Log.d(TAG, params.getURI() + "?" + params.getEncodedParams());
 			} else {
 				url = new URL(params.getURI());
 			}
@@ -58,6 +56,7 @@ public class HttpManager {
 		}
 
 		if (params.getMethod() == "POST") {
+			Log.d(TAG, "post->" + params.getURI() + params.getEncodedParams());
 			OutputStreamWriter writer = null;
 			try {
 				writer = new OutputStreamWriter(con.getOutputStream());

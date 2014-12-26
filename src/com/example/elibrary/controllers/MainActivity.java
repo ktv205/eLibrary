@@ -35,7 +35,6 @@ import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,22 +61,18 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Log.d(TAG, "onCreate");
 		context = getApplicationContext();
 		authPref = MySharedPreferences.getSharedPreferences(context,
 				AppPreferences.Auth.AUTHPREF);
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (CheckConnection.isConnected(context)) {
-			Log.d(TAG, "internet connected");
 			parentLinear = new LinearLayout(this);
 			parentLinear.setOrientation(LinearLayout.VERTICAL);
 			scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
 				new FetchBooksAsyncTask().execute(getParams());
-				// fetchData();
-				// fillWithBooks();
 			} else {
 				logout();
 			}
@@ -112,36 +107,26 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
-		// ImageView view = (ImageView) scrollView
-		// .findViewById(R.id.single_book_cover);
-		// int height = view.getHeight();
-		// int width = view.getWidth();
-		// Log.d(TAG, "width of image view->" + width);
-		// Log.d(TAG, "height of image view->" + height);
 	}
 
 	@SuppressLint("InflateParams")
 	public void fillWithBooks() {
-		Log.d(TAG, "fillWithBooks");
-
 		for (String key : booksMap.keySet()) {
 			View singleCategory = mInflater.inflate(
 					R.layout.inflate_single_category, null, false);
 			TextView textView = (TextView) singleCategory
 					.findViewById(R.id.single_category_textview_book_category);
-			Log.d(TAG, "category in fill books->" + key);
 			textView.setText(key);
 			LinearLayout horizontal = (LinearLayout) singleCategory
 					.findViewById(R.id.single_category_linearlayout_horizontal);
 
 			for (int j = 0; j < booksMap.get(key).size(); j++) {
 				final int id = booksMap.get(key).get(j).getBookId();
+				final String title=booksMap.get(key).get(j).getBookName();
 				View singleBook = mInflater.inflate(
 						R.layout.inflate_singlebook, null, false);
 				ImageView imageView = (ImageView) singleBook
 						.findViewById(R.id.single_book_cover);
-				// imageView.setImageBitmap(profile.getTypes().get("uploads")
-				// .get(j).getImagebitmap());
 				new BitmapAsyncTask(imageView).execute(booksMap.get(key).get(j)
 						.getProfilePic());
 				TextView titleTextView = (TextView) singleBook
@@ -159,11 +144,8 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 					@Override
 					public void onClick(View v) {
-						Log.d(TAG, "bookid on click->" + id);
-						new BookPagesAsyncTask()
+						new BookPagesAsyncTask(MainActivity.this,title)
 								.execute(getBookPagesParams(String.valueOf(id)));
-						// startActivity(new Intent(MainActivity.this,
-						// Book.class));
 
 					}
 				});
@@ -198,12 +180,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.d(TAG, "onResume");
 		if (CheckConnection.isConnected(context)) {
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
-				// fetchData();
-				// fillWithBooks();
 			} else {
 				logout();
 			}
@@ -214,7 +193,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	}
 
 	public void setMenuName() {
-		Log.d(TAG, "setMenuName");
 		if (menuGlobal != null) {
 			MenuItem item = menuGlobal.findItem(R.id.name_account_menu);
 			item.setTitle(authPref.getString(AppPreferences.Auth.KEY_NAME,
@@ -224,7 +202,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.d(TAG, "onCreateOptionsMenu");
 		getMenuInflater().inflate(R.menu.main, menu);
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
@@ -239,9 +216,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 	@Override
 	public void startActivity(Intent intent) {
-		Log.d(TAG, "in onStartActivity");
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			Log.d(TAG, "intent.getAction");
 			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE,
 					AppPreferences.BOOKSEARCH);
 		}
@@ -257,18 +232,13 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 					AppPreferences.SELF);
 			startActivity(intent);
 		} else if (id == R.id.settings_logout) {
-			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
 			auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
-			Log.d(TAG, "auth in logout->" + auth);
 			if (auth == AppPreferences.Auth.GOOGLE_AUTH) {
-				Log.d(TAG, "logout fron google");
 				logout.logoutFromGoogle();
 			} else if (auth == AppPreferences.Auth.FACEBOOK_AUTH) {
-				Log.d(TAG, "logout fron facebook");
 				logout.logoutFromFacebook();
 			} else {
-				Log.d(TAG, "logout from email");
 				logout.clearSharedPref();
 			}
 		} else if (id == R.id.settings_uploads) {
@@ -276,7 +246,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
 		} else if (id == R.id.setting_test) {
-			// new TestAsyncTask().execute(getParams());
 
 		}
 		return super.onOptionsItemSelected(item);
@@ -287,8 +256,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		if (cleared) {
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
-				// fetchData();
-				// fillWithBooks();
 			} else {
 				logout();
 			}
@@ -303,7 +270,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 	}
 
 	public RequestParams getParams() {
-		Log.d(TAG, "getParams()");
 		RequestParams params = new RequestParams();
 		params.setMethod("GET");
 		params.setURI("http://" + AppPreferences.ipAdd
@@ -311,9 +277,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		params.setParam("user_id", String.valueOf(authPref.getInt(
 				AppPreferences.Auth.KEY_USERID, -1)));
 		params.setParam("mobile", "1");
-		Log.d(TAG,
-				"user_id->"
-						+ authPref.getInt(AppPreferences.Auth.KEY_USERID, -1));
 		return params;
 	}
 
@@ -322,7 +285,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		params.setMethod("GET");
 		params.setURI("http://" + AppPreferences.ipAdd
 				+ "/eLibrary/library/index.php/book");
-		params.setParam("book_id", "39");
+		params.setParam("book_id", id);
 		params.setParam("user_id", String.valueOf(authPref.getInt(
 				AppPreferences.Auth.KEY_USERID, -1)));
 		params.setParam("page_no", "1");
@@ -349,20 +312,16 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		@Override
 		protected void onPostExecute(String result) {
 			dialog.dismiss();
-			Log.d(TAG, "onPostExecute->" + result);
 			booksMap = new HashMap<String, ArrayList<LibraryModel>>();
 			try {
 				JSONObject mainObject = new JSONObject(result);
 				int success = mainObject.getInt("success");
-				Log.d(TAG, "success for getting json object->" + success);
 				if (success == 1) {
-					Log.d(TAG, "inside if success");
 					JSONArray libraryArray = mainObject.getJSONArray("library");
 					for (int i = 0; i < libraryArray.length(); i++) {
 						JSONObject booksObjectByCategory = libraryArray
 								.getJSONObject(i);
 						String genre = booksObjectByCategory.getString("genre");
-						Log.d(TAG, "genre->" + genre);
 						getBooksByCategory(genre, booksMap,
 								booksObjectByCategory);
 
@@ -386,7 +345,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 				JSONObject bookObject = null;
 				while (j != -1) {
 					if (booksObject.isNull(String.valueOf(j))) {
-						Log.d(TAG, "null");
 						j = -1;
 					} else {
 						bookObject = booksObject.getJSONObject(String
@@ -448,7 +406,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			InputStream input = null;
 			try {
 				URL url = new URL(params[0]);
-				Log.d(TAG, "cover pic url->" + params[0]);
 				if (params[0].contains("https")) {
 					HttpsURLConnection connection = (HttpsURLConnection) url
 							.openConnection();
@@ -466,7 +423,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 				Bitmap myBitmap = BitmapFactory.decodeStream(input);
 				return myBitmap;
 			} catch (IOException e) {
-				// Log exception
 				return null;
 			}
 		}
@@ -478,33 +434,5 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 				view.setImageBitmap(result);
 			}
 		}
-	}
-
-	public class BookPagesAsyncTask extends
-			AsyncTask<RequestParams, Void, String> {
-		ProgressDialog dialog;
-
-		@Override
-		protected void onPreExecute() {
-			dialog = new ProgressDialog(MainActivity.this);
-			dialog.show();
-		}
-
-		@Override
-		protected String doInBackground(RequestParams... params) {
-			// TODO Auto-generated method stub
-			return new HttpManager().sendUserData(params[0]);
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			dialog.dismiss();
-			Log.d(TAG, "result->" + result);
-			Intent intent=new Intent(MainActivity.this, Book.class);
-			intent.putExtra("book", result);
-			MainActivity.this.startActivity(intent);
-
-		}
-
 	}
 }

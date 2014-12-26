@@ -35,31 +35,24 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 
 	@Override
 	protected void onPreExecute() {
-		Log.d(TAG, "onPreExecute");
 		dialog = new ProgressDialog(context);
 		dialog.show();
 	}
 
 	@Override
 	protected String doInBackground(RequestParams... params) {
-		Log.d(TAG, "doInBackground");
 		return new HttpManager().sendUserData(params[0]);
 	}
 
 	@Override
 	protected void onPostExecute(String result) {
 		dialog.dismiss();
-		Log.d(TAG, "onPostExecute");
-		Log.d(TAG, result);
 		int user_id = 0;
 		user_id = parseJsonString(result);
 		Intent intent;
-		if (user.getAuth() == AppPreferences.Auth.EMAIL_ENUM) {
-			if (user_id == 0) {
+		if (user_id != 0) {
+			if (user.getAuth() == AppPreferences.Auth.EMAIL_ENUM) {
 
-			} else {
-				Log.d(TAG, "onPostExecute EMAIL_ENUM");
-				Log.d(TAG, "onPostExecute,user_id->" + user_id);
 				Toast.makeText(context, "check your mail", Toast.LENGTH_SHORT)
 						.show();
 				intent = new Intent(context, Verification.class);
@@ -71,24 +64,23 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 						user);
 				context.startActivity(intent);
 				((Activity) context).finish();
+			} else {
+				intent = new Intent(context, MainActivity.class);
+				intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_USERID,
+						user_id);
+				intent.putExtra(
+						AppPreferences.Auth.KEY_PARCELABLE_SIGNUP_VERIFICATION,
+						user);
+				context.startActivity(intent);
+				((Activity) context).finish();
 			}
 		} else {
-			Toast.makeText(context, "successfully signed up",
-					Toast.LENGTH_SHORT).show();
-
-			intent = new Intent(context, MainActivity.class);
-			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_USERID,
-					user_id);
-			intent.putExtra(
-					AppPreferences.Auth.KEY_PARCELABLE_SIGNUP_VERIFICATION,
-					user);
-			context.startActivity(intent);
-			((Activity) context).finish();
+			Toast.makeText(context, "Please try again", Toast.LENGTH_LONG)
+					.show();
 		}
 	}
 
 	public int parseJsonString(String result) {
-		Log.d(TAG, "in parseJsonString");
 		JSONObject obj = null;
 		int user_id;
 		try {
@@ -97,15 +89,21 @@ public class AuthAsyncTask extends AsyncTask<RequestParams, Void, String> {
 			e.printStackTrace();
 		}
 		try {
-			if (obj.getInt("success") == 1) {
-				user_id = obj.getInt("user_id");
-				Log.d(TAG, "user_id->" + user_id);
-				edit.putInt(AppPreferences.Auth.KEY_USERID, user_id);
-				edit.putString(AppPreferences.Auth.KEY_PICTURE, obj.getString("user_pic"));
-				edit.commit();
-				return user_id;
+			if (obj.has("success")) {
+				if (obj.getInt("success") == 1) {
+					user_id = obj.getInt("user_id");
+					edit.putInt(AppPreferences.Auth.KEY_USERID, user_id);
+					if (obj.has("user_pic")) {
+						edit.putString(AppPreferences.Auth.KEY_PICTURE,
+								obj.getString("user_pic"));
+					}
+					edit.commit();
+					return user_id;
+				} else {
+					renderError(obj);
+					return 0;
+				}
 			} else {
-				renderError(obj);
 				return 0;
 			}
 		} catch (JSONException e) {

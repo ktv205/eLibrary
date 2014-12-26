@@ -127,20 +127,19 @@ public class FacebookFragment extends Fragment implements GraphUserCallback {
 		String id = user.getId();
 		String imageUri = "https://graph.facebook.com/" + id
 				+ "/picture?type=normal";
-		int auth = 1;
-		setSharedPreferences(name, email, id, imageUri, auth);
+		setSharedPreferences(name, email, id, imageUri);
 		setUserModel(name, email, imageUri);
 		RequestParams params = setParams();
 		sendDataToServer(params);
 	}
 
 	public void setSharedPreferences(String name, String email, String id,
-			String imageUri, int auth) {
+			String imageUri) {
 		
 		edit.putString(AppPreferences.Auth.KEY_NAME, name);
 		edit.putString(AppPreferences.Auth.KEY_EMAIL, email);
 		edit.putString(AppPreferences.Auth.KEY_GOOGLEID, id);
-		edit.putInt(AppPreferences.Auth.KEY_AUTH, auth);
+		edit.putInt(AppPreferences.Auth.KEY_AUTH,AppPreferences.Auth.FACEBOOK_AUTH);
 		edit.putString(AppPreferences.Auth.KEY_PICTURE, imageUri);
 		edit.commit();
 	}

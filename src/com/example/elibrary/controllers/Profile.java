@@ -118,8 +118,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
 				R.drawable.ic_launcher);
 		profilePicImageView = (ImageView) findViewById(R.id.profile_imageview_profilepic);
-		bitmap = getResizedBitmap(bitmap, 147, 147);
-		profilePicImageView.setImageBitmap(bitmap);
+		if(authPref.getString(AppPreferences.Auth.KEY_PICTURE, "n/a").equals("n/a")){
+			bitmap = getResizedBitmap(bitmap, 147, 147);
+			profilePicImageView.setImageBitmap(bitmap);	
+		}else{
+			new BitmapAsyncTask(profilePicImageView).execute(authPref.getString(AppPreferences.Auth.KEY_PICTURE, "n/a"));
+		}
+		
 
 	}
 
@@ -244,7 +249,9 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 						public void onClick(View v) {
 							// startActivity(new Intent(Profile.this,
 							// Book.class));
-							new BookPagesAsyncTask()
+							new BookPagesAsyncTask(Profile.this, profile
+									.getTypes().get("uploads").get(finalJ)
+									.getBookName())
 									.execute(getBookPagesParams(String
 											.valueOf(profile.getTypes()
 													.get("uploads").get(finalJ)
@@ -287,7 +294,9 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 							public void onClick(View v) {
 								// startActivity(new Intent(Profile.this,
 								// Book.class));
-								new BookPagesAsyncTask()
+								new BookPagesAsyncTask(Profile.this, profile
+										.getTypes().get("uploads").get(finalJ)
+										.getBookName())
 										.execute(getBookPagesParams(String
 												.valueOf(profile.getTypes()
 														.get("fav").get(finalJ)
@@ -298,12 +307,12 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					}
 				}
 			} else if (i == 2) {
-				textView.setText("private");
+				textView.setText("private_lib");
 				Log.d(TAG, "rows==2");
-				if (profile.getTypes().get("private") != null) {
+				if (profile.getTypes().get("private_lib") != null) {
 					LinearLayout horizontal = (LinearLayout) singleCategory
 							.findViewById(R.id.single_category_linearlayout_horizontal);
-					for (int j = 0; j < profile.getTypes().get("private")
+					for (int j = 0; j < profile.getTypes().get("private_lib")
 							.size(); j++) {
 						final int finalJ = j;
 						View singleBook = mInflater.inflate(
@@ -313,7 +322,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 						// imageView.setImageBitmap(profile.getTypes()
 						// .get("private").get(j).getImagebitmap());
 						new BitmapAsyncTask(imageView).execute(profile
-								.getTypes().get("private").get(j)
+								.getTypes().get("private_lib").get(j)
 								.getProfilePic());
 						TextView titleTextView = (TextView) singleBook
 								.findViewById(R.id.single_book_name);
@@ -321,22 +330,24 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 								.findViewById(R.id.single_book_author);
 						TextView userNameTextView = (TextView) singleBook
 								.findViewById(R.id.single_book_user);
-						titleTextView.setText(profile.getTypes().get("private")
+						titleTextView.setText(profile.getTypes().get("private_lib")
 								.get(j).getBookName());
 						authorTextView.setText(profile.getTypes()
-								.get("private").get(j).getBookAuthor());
+								.get("private_lib").get(j).getBookAuthor());
 						userNameTextView.setText(profile.getTypes()
-								.get("private").get(j).getUserName());
+								.get("private_lib").get(j).getUserName());
 						imageView.setOnClickListener(new OnClickListener() {
 
 							@Override
 							public void onClick(View v) {
 								// startActivity(new Intent(Profile.this,
 								// Book.class));
-								new BookPagesAsyncTask()
+								new BookPagesAsyncTask(Profile.this, profile
+										.getTypes().get("private_lib").get(finalJ)
+										.getBookName())
 										.execute(getBookPagesParams(String
 												.valueOf(profile.getTypes()
-														.get("private")
+														.get("private_lib")
 														.get(finalJ)
 														.getBookId())));
 
@@ -571,10 +582,10 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					if (profile.getFriendship().equals("self")) {
 						Log.d(TAG, "friendShip is self");
 						JSONArray privateArray = userLibObject
-								.getJSONArray("private");
+								.getJSONArray("private_lib");
 						Log.d(TAG, "fav size->" + privateArray.length());
 						if (privateArray.length() > 0) {
-							getBooksInfo(privateArray, "private", bookMap);
+							getBooksInfo(privateArray, "private_lib", bookMap);
 						}
 					}
 					profile.setTypes(bookMap);
@@ -675,6 +686,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 	}
 
 	public RequestParams getImageParams(String link) {
+		
 		return null;
 
 	}
@@ -749,34 +761,6 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		protected void onPostExecute(String result) {
 			Log.d(TAG, "result->" + result);
 		}
-	}
-
-	public class BookPagesAsyncTask extends
-			AsyncTask<RequestParams, Void, String> {
-		ProgressDialog dialog;
-
-		@Override
-		protected void onPreExecute() {
-			dialog = new ProgressDialog(Profile.this);
-			dialog.show();
-		}
-
-		@Override
-		protected String doInBackground(RequestParams... params) {
-			// TODO Auto-generated method stub
-			return new HttpManager().sendUserData(params[0]);
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			dialog.dismiss();
-			Log.d(TAG, "result->" + result);
-			Intent intent = new Intent(Profile.this, Book.class);
-			intent.putExtra("book", result);
-			Profile.this.startActivity(intent);
-
-		}
-
 	}
 
 }

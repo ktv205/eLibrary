@@ -9,7 +9,6 @@ public class MySharedPreferences {
 
 	public static SharedPreferences getSharedPreferences(Context context,
 			String name) {
-		Log.d(TAG, "getSharedPreferences method");
 		return context.getSharedPreferences(name, Context.MODE_PRIVATE);
 	}
 

@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.elibrary.R;
+import com.example.elibrary.models.AppPreferences;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class Book extends FragmentActivity {
 	private final static String TAG = "Book";
@@ -30,48 +32,41 @@ public class Book extends FragmentActivity {
 	private Context context;
 	private LayoutInflater mInflater;
 	private static int ADDFAV = 0;
-	private ArrayList<String> pages=new ArrayList<String>();
+	private String page = null;
+	private int book_id = -1;
+
 	@Override
 	protected void onCreate(Bundle arg0) {
 		super.onCreate(arg0);
 		setContentView(R.layout.activity_book);
-		Log.d(TAG, "onCreate");
 		context = getApplicationContext();
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (CheckConnection.isConnected(context)) {
-			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
-				Intent intent=getIntent();
-				if(intent.hasExtra("book")){
-					String result=intent.getExtras().getString("book");
-					
-					try {
-						JSONObject mainObject=new JSONObject(result);
-						int success=mainObject.getInt("success");
-						if(success==1){
-							JSONObject pageObject=mainObject.getJSONObject("page");
-							int j=1;
-							while(j!=-1){
-								if(pageObject.has(String.valueOf(j))){
-									pages.add("http://54.174.223.185/eLibrary/library/"+pageObject.getString(String.valueOf(j)));
-									j++;
-								}else{
-									j=-1;
-								}
-							}
-							count=pages.size();
-						}
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+				Intent intent = getIntent();
+				if (intent.hasExtra("book")) {
+					String[] result = new ParsePage().page(intent.getExtras()
+							.getString("book"));
+					if (result != null) {
+						getActionBar().setTitle(
+								intent.getExtras().getString("title"));
+						page = result[0];
+						count = Integer.valueOf(result[1]);
+						book_id = Integer.valueOf(result[2]);
+						MyViewPagerAdapter pagerAdaper = new MyViewPagerAdapter(
+								getSupportFragmentManager());
+						ViewPager viewPager = (ViewPager) findViewById(R.id.book_pager);
+						viewPager.setAdapter(pagerAdaper);
+					} else {
+						count = 1;
+						TextView text = new TextView(this);
+						text.setText("something went wrong,please go back");
+						setContentView(text);
+
 					}
 				}
-				
-				MyViewPagerAdapter pagerAdaper = new MyViewPagerAdapter(
-						getSupportFragmentManager());
-				ViewPager viewPager = (ViewPager) findViewById(R.id.book_pager);
-				viewPager.setAdapter(pagerAdaper);
+
 			} else {
 				logout();
 			}
@@ -101,7 +96,6 @@ public class Book extends FragmentActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.d(TAG, "onResume");
 		if (CheckConnection.isConnected(context)) {
 			if (CheckAuthentication.checkForAuthentication(context)) {
 
@@ -115,7 +109,6 @@ public class Book extends FragmentActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.d(TAG, "onCreateOptionsMenu");
 		getMenuInflater().inflate(R.menu.book_menu, menu);
 
 		return true;
@@ -130,7 +123,7 @@ public class Book extends FragmentActivity {
 				ADDFAV = 1;
 			} else {
 				item.setTitle("add to favourites");
-				ADDFAV=0;
+				ADDFAV = 0;
 			}
 		}
 		return true;
@@ -147,15 +140,16 @@ public class Book extends FragmentActivity {
 		public MyViewPagerAdapter(FragmentManager fm) {
 			super(fm);
 		}
-        
+
 		@Override
 		public Fragment getItem(int i) {
 			Bundle bundle = new Bundle();
-			bundle.putString("page", pages.get(i));
+			bundle.putInt("page_no", i + 1);
+			bundle.putString("page", page);
+			bundle.putInt("book_id", book_id);
 			PageFragment pageFragment = new PageFragment();
 			pageFragment.setArguments(bundle);
 			return pageFragment;
-
 		}
 
 		@Override

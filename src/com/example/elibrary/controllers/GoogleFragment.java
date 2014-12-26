@@ -15,7 +15,6 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -135,7 +134,6 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 		Person currentPerson = Plus.PeopleApi
 				.getCurrentPerson(mGoogleApiClient);
 		String name = currentPerson.getDisplayName();
-		int auth = 0;
 		String email = Plus.AccountApi.getAccountName(mGoogleApiClient);
 		Image picture = currentPerson.getImage();
 		String imageUri = picture.toString();
@@ -149,7 +147,7 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 		}
 		
 		String id = currentPerson.getId();
-		setSharedPreferences(name, email, id, imageLink, auth);
+		setSharedPreferences(name, email, id, imageLink);
 		setUserModel(name, email, imageLink);
 		RequestParams params = setParams();
 		sendDataToServer(params);
@@ -176,14 +174,14 @@ public class GoogleFragment extends Fragment implements ConnectionCallbacks,
 	}
 
 	public void setSharedPreferences(String name, String email, String id,
-			String imageUri, int auth) {
+			String imageUri) {
 		authPref = getSharedPreferences(getActivity(),
 				AppPreferences.Auth.AUTHPREF);
 		edit = authPref.edit();
 		edit.putString(AppPreferences.Auth.KEY_NAME, name);
 		edit.putString(AppPreferences.Auth.KEY_EMAIL, email);
 		edit.putString(AppPreferences.Auth.KEY_GOOGLEID, id);
-		edit.putInt(AppPreferences.Auth.KEY_AUTH, auth);
+		edit.putInt(AppPreferences.Auth.KEY_AUTH, AppPreferences.Auth.GOOGLE_AUTH);
 		edit.putString(AppPreferences.Auth.KEY_PICTURE, imageUri);
 		edit.commit();
 	}
