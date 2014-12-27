@@ -52,7 +52,7 @@ public class PageFragment extends Fragment {
 		RequestParams params = new RequestParams();
 		params.setMethod("GET");
 		params.setURI("http://" + AppPreferences.ipAdd
-				+ "/eLibrary/library/index.php/book");
+				+ "/eLibrary/library/index.php/book/get_page");
 		params.setParam("book_id", id);
 		params.setParam("user_id", String.valueOf(authPref.getInt(
 				AppPreferences.Auth.KEY_USERID, -1)));

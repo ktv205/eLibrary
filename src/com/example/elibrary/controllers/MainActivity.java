@@ -144,8 +144,13 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 						R.layout.inflate_singlebook, null, false);
 				ImageView imageView = (ImageView) singleBook
 						.findViewById(R.id.single_book_cover);
-				new BitmapAsyncTask(imageView).execute(booksMap.get(key).get(j)
-						.getProfilePic());
+				if (booksMap.get(key).get(j).getImagebitmap() == null) {
+					new BitmapAsyncTask(imageView, booksMap.get(key).get(j))
+							.execute(booksMap.get(key).get(j).getProfilePic());
+				} else {
+					imageView.setImageBitmap(booksMap.get(key).get(j)
+							.getImagebitmap());
+				}
 				TextView titleTextView = (TextView) singleBook
 						.findViewById(R.id.single_book_name);
 				TextView authorTextView = (TextView) singleBook
@@ -161,7 +166,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 					@Override
 					public void onClick(View v) {
-						new BookPagesAsyncTask(MainActivity.this, title)
+						new ViewBookAsyncTask(MainActivity.this)
 								.execute(getBookPagesParams(String.valueOf(id)));
 
 					}
@@ -317,7 +322,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		params.setParam("book_id", id);
 		params.setParam("user_id", String.valueOf(authPref.getInt(
 				AppPreferences.Auth.KEY_USERID, -1)));
-		params.setParam("page_no", "1");
 		params.setParam("mobile", "1");
 		return params;
 
@@ -413,6 +417,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		MyHolder holder;
 		LibraryModel model;
 		ImageView view;
+		LibraryModel libraryModel;
 
 		public BitmapAsyncTask(MyHolder holder) {
 			this.holder = holder;
@@ -426,8 +431,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			this.model = model;
 		}
 
-		public BitmapAsyncTask(ImageView imageView) {
+		public BitmapAsyncTask(ImageView imageView, LibraryModel libraryModel) {
 			this.view = imageView;
+			this.libraryModel = libraryModel;
 		}
 
 		@Override
@@ -460,6 +466,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		protected void onPostExecute(Bitmap result) {
 			if (result != null) {
 				result = getResizedBitmap(result, 300, 300);
+				libraryModel.setImagebitmap(result);
 				view.setImageBitmap(result);
 			}
 		}

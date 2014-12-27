@@ -154,7 +154,7 @@ public class Book extends FragmentActivity {
 
 		@Override
 		public int getCount() {
-			return count;
+			return count-1;
 		}
 
 	}

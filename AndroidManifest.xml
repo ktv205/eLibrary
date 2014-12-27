@@ -102,6 +102,8 @@
             android:name="com.example.elibrary.controllers.Book"
             android:label="@string/string_book_title" >
         </activity>
+        <activity android:name="com.example.elibrary.controllers.ViewBook" >
+        </activity>
 
         <meta-data
             android:name="com.google.android.gms.version"

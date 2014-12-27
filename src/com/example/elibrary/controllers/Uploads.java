@@ -171,8 +171,12 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 					.findViewById(R.id.single_book_cover);
 			// imageView.setImageBitmap(profile.getTypes().get("uploads")
 			// .get(j).getImagebitmap());
-			new BitmapAsyncTask(imageView).execute(libraryModel.get(j)
+			if(libraryModel.get(j).getImagebitmap()==null){
+			new BitmapAsyncTask(imageView,libraryModel.get(j)).execute(libraryModel.get(j)
 					.getProfilePic());
+			}else{
+				imageView.setImageBitmap(libraryModel.get(j).getImagebitmap());
+			}
 			TextView titleTextView = (TextView) singleBook
 					.findViewById(R.id.single_book_name);
 			TextView authorTextView = (TextView) singleBook
@@ -591,6 +595,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		MyHolder holder;
 		LibraryModel model;
 		ImageView view;
+		LibraryModel libraryModel;
 
 		public BitmapAsyncTask(MyHolder holder) {
 			this.holder = holder;
@@ -604,8 +609,9 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			this.model = model;
 		}
 
-		public BitmapAsyncTask(ImageView imageView) {
+		public BitmapAsyncTask(ImageView imageView, LibraryModel libraryModel) {
 			this.view = imageView;
+			this.libraryModel=libraryModel;
 		}
 
 		@Override
@@ -640,6 +646,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		protected void onPostExecute(Bitmap result) {
 			if (result != null) {
 				result = getResizedBitmap(result, 300, 300);
+				libraryModel.setImagebitmap(result);
 				view.setImageBitmap(result);
 			}
 

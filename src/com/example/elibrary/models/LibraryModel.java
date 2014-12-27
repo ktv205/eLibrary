@@ -16,7 +16,7 @@ public class LibraryModel implements Parcelable {
 	private String isbn;
 	private String bookGenre;
 	private String privacy;
-	private Bitmap Imagebitmap;
+	private Bitmap imageBitmap;
 	private int user_id;
 
 	@Override
@@ -38,6 +38,7 @@ public class LibraryModel implements Parcelable {
 		dest.writeString(isbn);
 		dest.writeString(bookGenre);
 		dest.writeString(privacy);
+		dest.writeValue(imageBitmap);
 		dest.writeInt(user_id);
 	}
 
@@ -148,11 +149,11 @@ public class LibraryModel implements Parcelable {
 	
 
 	public Bitmap getImagebitmap() {
-		return Imagebitmap;
+		return imageBitmap;
 	}
 
-	public void setImagebitmap(Bitmap imagebitmap) {
-		Imagebitmap = imagebitmap;
+	public void setImagebitmap(Bitmap imageBitmap) {
+		this.imageBitmap = imageBitmap;
 	}
 
 	public LibraryModel(Parcel source) {
@@ -167,6 +168,7 @@ public class LibraryModel implements Parcelable {
 		isbn = source.readString();
 		bookGenre = source.readString();
 		privacy = source.readString();
+		imageBitmap=source.readParcelable(Bitmap.class.getClassLoader());
 		user_id=source.readInt();
 
 	}

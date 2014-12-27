@@ -242,8 +242,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 							.findViewById(R.id.single_book_cover);
 					// imageView.setImageBitmap(profile.getTypes().get("uploads")
 					// .get(j).getImagebitmap());
-					new BitmapAsyncTask(imageView).execute(profile.getTypes()
-							.get("uploads").get(j).getProfilePic());
+					if(profile.getTypes().get("uploads").get(j).getImagebitmap()==null){
+						new BitmapAsyncTask(imageView,profile.getTypes().get("uploads").get(j)).execute(profile
+								.getTypes().get("uploads").get(j)
+								.getProfilePic());
+						}else{
+							imageView.setImageBitmap(profile.getTypes().get("uploads").get(j).getImagebitmap());
+						}
 					TextView titleTextView = (TextView) singleBook
 							.findViewById(R.id.single_book_name);
 					TextView authorTextView = (TextView) singleBook
@@ -287,8 +292,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 								.findViewById(R.id.single_book_cover);
 						// imageView.setImageBitmap(profile.getTypes().get("fav")
 						// .get(j).getImagebitmap());
-						new BitmapAsyncTask(imageView).execute(profile
-								.getTypes().get("fav").get(j).getProfilePic());
+						if(profile.getTypes().get("fav").get(j).getImagebitmap()==null){
+							new BitmapAsyncTask(imageView,profile.getTypes().get("fav").get(j)).execute(profile
+									.getTypes().get("fav").get(j)
+									.getProfilePic());
+							}else{
+								imageView.setImageBitmap(profile.getTypes().get("fav").get(j).getImagebitmap());
+							}
 						TextView titleTextView = (TextView) singleBook
 								.findViewById(R.id.single_book_name);
 						TextView authorTextView = (TextView) singleBook
@@ -332,11 +342,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 								R.layout.inflate_singlebook, null, false);
 						ImageView imageView = (ImageView) singleBook
 								.findViewById(R.id.single_book_cover);
-						// imageView.setImageBitmap(profile.getTypes()
-						// .get("private").get(j).getImagebitmap());
-						new BitmapAsyncTask(imageView).execute(profile
+						if(profile.getTypes().get("private_lib").get(j).getImagebitmap()==null){
+						new BitmapAsyncTask(imageView,profile.getTypes().get("private_lib").get(j)).execute(profile
 								.getTypes().get("private_lib").get(j)
 								.getProfilePic());
+						}else{
+							imageView.setImageBitmap(profile.getTypes().get("private_lib").get(j).getImagebitmap());
+						}
 						TextView titleTextView = (TextView) singleBook
 								.findViewById(R.id.single_book_name);
 						TextView authorTextView = (TextView) singleBook
@@ -706,7 +718,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 	public class BitmapAsyncTask extends AsyncTask<String, Void, Bitmap> {
 		MyHolder holder;
-		LibraryModel model;
+		LibraryModel model=null;
 		ImageView view;
 
 		public BitmapAsyncTask(MyHolder holder) {
@@ -721,8 +733,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 			this.model = model;
 		}
 
-		public BitmapAsyncTask(ImageView imageView) {
+		public BitmapAsyncTask(ImageView imageView, LibraryModel libraryModel) {
 			this.view = imageView;
+			this.model=libraryModel;
+		}
+
+		public BitmapAsyncTask(ImageView profilePicImageView) {
+			this.view=profilePicImageView;
 		}
 
 		@Override
@@ -757,6 +774,9 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		protected void onPostExecute(Bitmap result) {
 			if (result != null) {
 				result = getResizedBitmap(result, 300, 300);
+				if(model!=null){
+					model.setImagebitmap(result);
+				}
 				view.setImageBitmap(result);
 			}
 		}
