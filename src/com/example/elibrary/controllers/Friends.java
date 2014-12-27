@@ -71,7 +71,7 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				trainingSet();
 				setMenuName();
-				//new FriendsAsyncTask().execute(getRequestParams());
+				new FriendsAsyncTask().execute(getRequestParams());
 			} else {
 				logout();
 			}
@@ -102,8 +102,9 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 			}
 		});
 	}
-    public RequestParams getRequestParams(){
-    	Log.d(TAG, "getParams()");
+
+	public RequestParams getRequestParams() {
+		Log.d(TAG, "getParams()");
 		RequestParams params = new RequestParams();
 		params.setMethod("POST");
 		params.setURI("http://" + AppPreferences.ipAdd
@@ -115,8 +116,9 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 				"user_id->"
 						+ authPref.getInt(AppPreferences.Auth.KEY_USERID, -1));
 		return params;
-    	
-    }
+
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -190,8 +192,7 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		int id = item.getItemId();
 		if (id == R.id.name_account_menu) {
 			Intent intent = new Intent(this, Profile.class);
-			intent.putExtra(
-					AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
+			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
 					AppPreferences.SELF);
 			startActivity(intent);
 			startActivity(intent);
@@ -237,35 +238,33 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		}
 
 		@Override
-		protected String doInBackground(
-				RequestParams... params) {
+		protected String doInBackground(RequestParams... params) {
 			// TODO Auto-generated method stub
 			return new HttpManager().sendUserData(params[0]);
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
-			Log.d(TAG,"result->"+result);
-			JSONObject mainObject;
-			try {
-				mainObject = new JSONObject(result);
-				int success=mainObject.getInt("success");
-				if(success==1){
-					JSONArray friendArray=mainObject.getJSONArray("friendlist");
-					int length=friendArray.length();
-					if(length==0){
-						TextView text=new TextView(Friends.this);
-						text.setText("No friends");
-						Friends.this.setContentView(text);
-						
-					}
-				}
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
+			Log.d(TAG, "result->" + result);
+			// JSONObject mainObject;
+			// try {
+			// mainObject = new JSONObject(result);
+			// int success=mainObject.getInt("success");
+			// if(success==1){
+			// JSONArray friendArray=mainObject.getJSONArray("friendlist");
+			// int length=friendArray.length();
+			// if(length==0){
+			// TextView text=new TextView(Friends.this);
+			// text.setText("No friends");
+			// Friends.this.setContentView(text);
+			//
+			// }
+			// }
+			// } catch (JSONException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+
 		}
 
 	}

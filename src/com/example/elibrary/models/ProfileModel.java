@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProfileModel {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class ProfileModel implements Parcelable{
 	int user_id;
 	int success;
 	String user_name;
@@ -12,6 +15,18 @@ public class ProfileModel {
 	String friendship;
 	ArrayList<LibraryModel> booklist=new ArrayList<LibraryModel>();
 	Map<String, ArrayList<LibraryModel>> types=new HashMap<String, ArrayList<LibraryModel>>();
+	public ProfileModel(Parcel source) {
+		user_id=source.readInt();
+		success=source.readInt();
+		user_name=source.readString();
+		user_email=source.readString();
+		friendship=source.readString();
+		booklist=source.readArrayList(ClassLoader.getSystemClassLoader());
+		types=source.readHashMap(ClassLoader.getSystemClassLoader());
+	}
+	public ProfileModel() {
+		// TODO Auto-generated constructor stub
+	}
 	public int getUser_id() {
 		return user_id;
 	}
@@ -55,7 +70,34 @@ public class ProfileModel {
 	public void setBooklist(ArrayList<LibraryModel> booklist) {
 		this.booklist = booklist;
 	}
-    
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(user_id);
+		dest.writeInt(success);
+		dest.writeString(user_name);
+		dest.writeString(user_email);
+		dest.writeString(friendship);
+		dest.writeList(booklist);
+		dest.writeMap(types);
+	}
+    public static final Parcelable.Creator<ProfileModel> CREATOR=new Creator<ProfileModel>() {
+		
+		@Override
+		public ProfileModel[] newArray(int size) {
+			return new ProfileModel[size];
+		}
+		
+		@Override
+		public ProfileModel createFromParcel(Parcel source) {
+			// TODO Auto-generated method stub
+			return new ProfileModel(source);
+		}
+	};
     
 
 }

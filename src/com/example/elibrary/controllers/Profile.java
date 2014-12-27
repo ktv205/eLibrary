@@ -95,8 +95,14 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 						selfFlag = 0;
 						to_user_id = intent.getExtras().getString("to_user_id");
 					}
-					RequestParams params = getRequestParams();
-					new GetProfileAsyncTask().execute(params);
+					if (savedInstanceState == null) {
+						RequestParams params = getRequestParams();
+						new GetProfileAsyncTask().execute(params);
+					}else{
+						profile=new ProfileModel();
+						profile=savedInstanceState.getParcelable("profile");
+						fillBooks();
+					}
 
 				}
 			} else {
@@ -118,14 +124,21 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
 				R.drawable.ic_launcher);
 		profilePicImageView = (ImageView) findViewById(R.id.profile_imageview_profilepic);
-		if(authPref.getString(AppPreferences.Auth.KEY_PICTURE, "n/a").equals("n/a")){
+		if (authPref.getString(AppPreferences.Auth.KEY_PICTURE, "n/a").equals(
+				"n/a")) {
 			bitmap = getResizedBitmap(bitmap, 147, 147);
-			profilePicImageView.setImageBitmap(bitmap);	
-		}else{
-			new BitmapAsyncTask(profilePicImageView).execute(authPref.getString(AppPreferences.Auth.KEY_PICTURE, "n/a"));
+			profilePicImageView.setImageBitmap(bitmap);
+		} else {
+			new BitmapAsyncTask(profilePicImageView).execute(authPref
+					.getString(AppPreferences.Auth.KEY_PICTURE, "n/a"));
 		}
-		
 
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putParcelable("profile", profile);
+		super.onSaveInstanceState(outState);
 	}
 
 	public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
@@ -330,8 +343,8 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 								.findViewById(R.id.single_book_author);
 						TextView userNameTextView = (TextView) singleBook
 								.findViewById(R.id.single_book_user);
-						titleTextView.setText(profile.getTypes().get("private_lib")
-								.get(j).getBookName());
+						titleTextView.setText(profile.getTypes()
+								.get("private_lib").get(j).getBookName());
 						authorTextView.setText(profile.getTypes()
 								.get("private_lib").get(j).getBookAuthor());
 						userNameTextView.setText(profile.getTypes()
@@ -343,8 +356,8 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 								// startActivity(new Intent(Profile.this,
 								// Book.class));
 								new BookPagesAsyncTask(Profile.this, profile
-										.getTypes().get("private_lib").get(finalJ)
-										.getBookName())
+										.getTypes().get("private_lib")
+										.get(finalJ).getBookName())
 										.execute(getBookPagesParams(String
 												.valueOf(profile.getTypes()
 														.get("private_lib")
@@ -686,7 +699,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 	}
 
 	public RequestParams getImageParams(String link) {
-		
+
 		return null;
 
 	}

@@ -35,6 +35,7 @@ import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -72,7 +73,27 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			scrollView = (ScrollView) findViewById(R.id.main_scrollview_parent);
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				setMenuName();
-				new FetchBooksAsyncTask().execute(getParams());
+				if (savedInstanceState == null) {
+					new FetchBooksAsyncTask().execute(getParams());
+				} else {
+					Log.d(TAG, "size after saving->"
+							+ savedInstanceState.getStringArrayList("keys")
+									.size());
+					booksMap = new HashMap<String, ArrayList<LibraryModel>>();
+					for (int i = 0; i < savedInstanceState.getStringArrayList(
+							"keys").size(); i++) {
+
+						ArrayList<LibraryModel> libraryModel = new ArrayList<LibraryModel>();
+						libraryModel = savedInstanceState
+								.getParcelableArrayList(savedInstanceState
+										.getStringArrayList("keys").get(i));
+						booksMap.put(
+								savedInstanceState.getStringArrayList("keys")
+										.get(i), libraryModel);
+
+					}
+					fillWithBooks();
+				}
 			} else {
 				logout();
 			}
@@ -100,10 +121,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		});
 	}
 
-	public void fetchData() {
-
-	}
-
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
@@ -122,7 +139,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 			for (int j = 0; j < booksMap.get(key).size(); j++) {
 				final int id = booksMap.get(key).get(j).getBookId();
-				final String title=booksMap.get(key).get(j).getBookName();
+				final String title = booksMap.get(key).get(j).getBookName();
 				View singleBook = mInflater.inflate(
 						R.layout.inflate_singlebook, null, false);
 				ImageView imageView = (ImageView) singleBook
@@ -144,7 +161,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 					@Override
 					public void onClick(View v) {
-						new BookPagesAsyncTask(MainActivity.this,title)
+						new BookPagesAsyncTask(MainActivity.this, title)
 								.execute(getBookPagesParams(String.valueOf(id)));
 
 					}
@@ -221,6 +238,18 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 					AppPreferences.BOOKSEARCH);
 		}
 		super.startActivity(intent);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		ArrayList<String> keys = new ArrayList<String>();
+		for (String key : booksMap.keySet()) {
+			keys.add(key);
+			outState.putParcelableArrayList(key, booksMap.get(key));
+		}
+		Log.d(TAG, "size of saved keys->" + keys.size());
+		outState.putStringArrayList("keys", keys);
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override

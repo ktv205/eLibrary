@@ -90,7 +90,13 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				initialize();
+				if(savedInstanceState==null){
 				new GetUploadHistoryAsycTask().execute(getRequestParams());
+				}else{
+					libraryModel=new ArrayList<LibraryModel>();
+					libraryModel=savedInstanceState.getParcelableArrayList("uploadhistory");
+					fillBooks();
+				}
 				// fillBooks();
 			} else {
 				logout();
@@ -253,7 +259,11 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		setMenuName();
 		return true;
 	}
-
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	outState.putParcelableArrayList("uploadhistory", libraryModel);
+    	super.onSaveInstanceState(outState);
+    }
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
