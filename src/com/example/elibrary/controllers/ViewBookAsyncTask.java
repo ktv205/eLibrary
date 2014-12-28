@@ -8,9 +8,11 @@ import android.os.AsyncTask;
 
 public class ViewBookAsyncTask extends AsyncTask<RequestParams, Void, String> {
 	Context context;
+	String picUrl;
 
-	public ViewBookAsyncTask(Context context) {
+	public ViewBookAsyncTask(Context context, String picUrl) {
 		this.context = context;
+		this.picUrl=picUrl;
 	}
 
 	@Override
@@ -22,6 +24,7 @@ public class ViewBookAsyncTask extends AsyncTask<RequestParams, Void, String> {
 	protected void onPostExecute(String result) {
 		Intent intent=new Intent(context,ViewBook.class);
 		intent.putExtra("viewbook",result);
+		intent.putExtra("picUrl", picUrl);
 		context.startActivity(intent);
 		//book/get_page
 	}

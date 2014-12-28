@@ -140,6 +140,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			for (int j = 0; j < booksMap.get(key).size(); j++) {
 				final int id = booksMap.get(key).get(j).getBookId();
 				final String title = booksMap.get(key).get(j).getBookName();
+				final String picUrl=booksMap.get(key).get(j).getProfilePic();
 				View singleBook = mInflater.inflate(
 						R.layout.inflate_singlebook, null, false);
 				ImageView imageView = (ImageView) singleBook
@@ -166,7 +167,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 					@Override
 					public void onClick(View v) {
-						new ViewBookAsyncTask(MainActivity.this)
+						new ViewBookAsyncTask(MainActivity.this,picUrl)
 								.execute(getBookPagesParams(String.valueOf(id)));
 
 					}
@@ -262,8 +263,6 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 		int id = item.getItemId();
 		if (id == R.id.name_account_menu) {
 			Intent intent = new Intent(this, Profile.class);
-			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
-					AppPreferences.SELF);
 			startActivity(intent);
 		} else if (id == R.id.settings_logout) {
 			Logout logout = new Logout(this);

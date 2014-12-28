@@ -1,7 +1,9 @@
 package com.example.elibrary.models;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.widget.Button;
 
 public class FriendsModel implements Parcelable{
   
@@ -9,12 +11,14 @@ public class FriendsModel implements Parcelable{
 	private String name;
 	private String email;
 	private String profilePic;
+	private Bitmap profilePicBitmap;
 
 	public FriendsModel(Parcel source) {
 		name = source.readString();
 		email = source.readString();
 		profilePic = source.readString();
 		id=source.readInt();
+		profilePicBitmap=source.readParcelable(Bitmap.class.getClassLoader());
 	}
 
 	public FriendsModel() {
@@ -41,6 +45,7 @@ public class FriendsModel implements Parcelable{
 		dest.writeString(email);
 		dest.writeString(profilePic);
 		dest.writeInt(id);
+		dest.writeValue(profilePicBitmap);
 
 	}
 
@@ -75,6 +80,15 @@ public class FriendsModel implements Parcelable{
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+
+	public Bitmap getProfilePicBitmap() {
+		return profilePicBitmap;
+	}
+
+	public void setProfilePicBitmap(Bitmap profilePicBitmap) {
+		this.profilePicBitmap = profilePicBitmap;
 	}
 
 

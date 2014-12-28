@@ -46,7 +46,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class Profile extends Activity implements OnLogoutSuccessful {
 	private static final String TAG = "Profile";
@@ -55,12 +54,9 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 	private Menu menuGlobal;
 	private int auth;
 	private LayoutInflater mInflater;
-	private static int who;
 	private LinearLayout parentLinear;
 	private ScrollView parentScroll;
-	private TextView nameTextView, emailTextView, booksUploadedTextView,
-			titleTextView;
-	private Button friendButton;
+	private TextView nameTextView, emailTextView, booksUploadedTextView;
 	private ImageView profilePicImageView;
 	private ProfileModel profile;
 	private int selfFlag = 1;
@@ -84,13 +80,6 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				initialize();
 				Intent intent = getIntent();
 				if (intent != null) {
-					if (intent
-							.hasExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE)) {
-						who = intent
-								.getExtras()
-								.getInt(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE);
-
-					}
 					if (intent.hasExtra("to_user_id")) {
 						selfFlag = 0;
 						to_user_id = intent.getExtras().getString("to_user_id");
@@ -98,9 +87,9 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					if (savedInstanceState == null) {
 						RequestParams params = getRequestParams();
 						new GetProfileAsyncTask().execute(params);
-					}else{
-						profile=new ProfileModel();
-						profile=savedInstanceState.getParcelable("profile");
+					} else {
+						profile = new ProfileModel();
+						profile = savedInstanceState.getParcelable("profile");
 						fillBooks();
 					}
 
@@ -119,19 +108,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		nameTextView = (TextView) findViewById(R.id.profile_textview_name);
 		emailTextView = (TextView) findViewById(R.id.profile_textview_email);
 		booksUploadedTextView = (TextView) findViewById(R.id.profile_textview_uploaded);
-		friendButton = (Button) findViewById(R.id.profile_button_friend);
-		titleTextView = (TextView) findViewById(R.id.profile_textview_title);
-		Bitmap bitmap = BitmapFactory.decodeResource(getResources(),
-				R.drawable.ic_launcher);
 		profilePicImageView = (ImageView) findViewById(R.id.profile_imageview_profilepic);
-		if (authPref.getString(AppPreferences.Auth.KEY_PICTURE, "n/a").equals(
-				"n/a")) {
-			bitmap = getResizedBitmap(bitmap, 147, 147);
-			profilePicImageView.setImageBitmap(bitmap);
-		} else {
-			new BitmapAsyncTask(profilePicImageView).execute(authPref
-					.getString(AppPreferences.Auth.KEY_PICTURE, "n/a"));
-		}
 
 	}
 
@@ -172,58 +149,65 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		emailTextView.setText(profile.getUser_email());
 		booksUploadedTextView.append(" "
 				+ profile.getTypes().get("uploads").size());
-		int rows = 0;
-		if (profile.getFriendship().equals("self")) {
-			Log.d(TAG, "its self in fillbooks");
-			rows = 3;
+		if (profile.getUser_pic() != null) {
+			Log.d(TAG, "in setting profile pic->" + profile.getUser_pic());
+			new BitmapAsyncTask(profilePicImageView).execute(profile
+					.getUser_pic());
 		} else {
-			rows = 2;
+			Log.d(TAG, "in setting profile pic->" + "some thing wrong");
 		}
 
-		if (who == AppPreferences.FRIEND
-				|| profile.getFriendship().equals("friends")) {
-			friendButton.setText("friends");
-			titleTextView.setText("Library");
-			rows = 2;
-		} else if (who == AppPreferences.STRANGER
-				|| profile.getFriendship().equals("no")) {
-			friendButton.setText("add friend");
-			titleTextView.setText("Library");
-			rows = 2;
-		} else if (who == AppPreferences.SELF
-				|| profile.getFriendship().equals("self")) {
-			friendButton.setText("self");
-			titleTextView.setText("My Library");
-			rows = 3;
+		View friendProfileContents = mInflater.inflate(
+				R.layout.inflate_contents_profile, null, false);
+		TextView friendProfileTextView = (TextView) friendProfileContents
+				.findViewById(R.id.contents_profile_textview_text);
+		Button friendProfileButton = (Button) friendProfileContents
+				.findViewById(R.id.contents_profile_button_friend);
+		if (profile.getFriendship().equals("no")) {
+			friendProfileTextView
+					.setText("Do you want to send a friend request?");
+			friendProfileButton.setText("add friend");
+			parentLinear.addView(friendProfileContents);
+		} else if (profile.getFriendship().equals("withheld")) {
+			friendProfileTextView.setText("Respond to a friend request");
+			friendProfileButton.setText("respond");
+			parentLinear.addView(friendProfileContents);
 		} else if (profile.getFriendship().equals("pending")) {
-			friendButton.setText("pending");
-		} else if (profile.getFriendship().equals("withhelp")) {
-			friendButton.setText("respond to friend request");
+			friendProfileTextView
+					.setText("waiting for the person to accept your friend request");
+			friendProfileButton.setText("pending");
+			parentLinear.addView(friendProfileContents);
+		} else if (profile.getFriendship().equals("friend")) {
+			friendProfileTextView.setText("You are friends with this person");
+			friendProfileButton.setText("remove friend");
+			parentLinear.addView(friendProfileContents);
 		}
-		friendButton.setOnClickListener(new OnClickListener() {
+		friendProfileButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				if (profile.getFriendship().equals("no")) {
-					friendButton.setText("pending");
-					Toast.makeText(Profile.this, "friend request sent",
-							Toast.LENGTH_SHORT).show();
 					new SendFriendRequestAsyncTask()
-							.execute(getFriendRequestParams("no",
+							.execute(getFriendRequestParams("add_friend",
 									String.valueOf(profile.getUser_id())));
 				} else if (profile.getFriendship().equals("withheld")) {
-					friendButton.setText("friends");
 					new SendFriendRequestAsyncTask()
-							.execute(getFriendRequestParams("withheld",
+							.execute(getFriendRequestParams("accept_friend",
 									String.valueOf(profile.getUser_id())));
-					Toast.makeText(Profile.this, "you made a new friend",
-							Toast.LENGTH_SHORT).show();
-
 				}
+
 			}
 		});
+		View libraryTitleView = mInflater.inflate(
+				R.layout.inflate_profile_title, null, false);
+		TextView titleLibraryTextView = (TextView) libraryTitleView
+				.findViewById(R.id.profile_title_textview);
+		titleLibraryTextView.setText("Library");
+		parentLinear.addView(libraryTitleView);
+		int rows = 1;
 
 		for (int i = 0; i < rows; i++) {
+
 			Log.d(TAG, "inside rows for loop");
 			View singleCategory = mInflater.inflate(
 					R.layout.inflate_single_category, null, false);
@@ -240,15 +224,16 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 							R.layout.inflate_singlebook, null, false);
 					ImageView imageView = (ImageView) singleBook
 							.findViewById(R.id.single_book_cover);
-					// imageView.setImageBitmap(profile.getTypes().get("uploads")
-					// .get(j).getImagebitmap());
-					if(profile.getTypes().get("uploads").get(j).getImagebitmap()==null){
-						new BitmapAsyncTask(imageView,profile.getTypes().get("uploads").get(j)).execute(profile
+					if (profile.getTypes().get("uploads").get(j)
+							.getImagebitmap() == null) {
+						new BitmapAsyncTask(imageView, profile.getTypes()
+								.get("uploads").get(j)).execute(profile
 								.getTypes().get("uploads").get(j)
 								.getProfilePic());
-						}else{
-							imageView.setImageBitmap(profile.getTypes().get("uploads").get(j).getImagebitmap());
-						}
+					} else {
+						imageView.setImageBitmap(profile.getTypes()
+								.get("uploads").get(j).getImagebitmap());
+					}
 					TextView titleTextView = (TextView) singleBook
 							.findViewById(R.id.single_book_name);
 					TextView authorTextView = (TextView) singleBook
@@ -265,11 +250,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 						@Override
 						public void onClick(View v) {
-							// startActivity(new Intent(Profile.this,
-							// Book.class));
-							new BookPagesAsyncTask(Profile.this, profile
-									.getTypes().get("uploads").get(finalJ)
-									.getBookName())
+							new ViewBookAsyncTask(Profile.this,profile.getTypes().get("uploads").get(finalJ).getProfilePic())
 									.execute(getBookPagesParams(String
 											.valueOf(profile.getTypes()
 													.get("uploads").get(finalJ)
@@ -278,119 +259,16 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					});
 					horizontal.addView(singleBook);
 				}
-			} else if (i == 1) {
-				Log.d(TAG, "rows==1");
-				textView.setText("favourites");
-				if (profile.getTypes().get("fav") != null) {
-					LinearLayout horizontal = (LinearLayout) singleCategory
-							.findViewById(R.id.single_category_linearlayout_horizontal);
-					for (int j = 0; j < profile.getTypes().get("fav").size(); j++) {
-						final int finalJ = j;
-						View singleBook = mInflater.inflate(
-								R.layout.inflate_singlebook, null, false);
-						ImageView imageView = (ImageView) singleBook
-								.findViewById(R.id.single_book_cover);
-						// imageView.setImageBitmap(profile.getTypes().get("fav")
-						// .get(j).getImagebitmap());
-						if(profile.getTypes().get("fav").get(j).getImagebitmap()==null){
-							new BitmapAsyncTask(imageView,profile.getTypes().get("fav").get(j)).execute(profile
-									.getTypes().get("fav").get(j)
-									.getProfilePic());
-							}else{
-								imageView.setImageBitmap(profile.getTypes().get("fav").get(j).getImagebitmap());
-							}
-						TextView titleTextView = (TextView) singleBook
-								.findViewById(R.id.single_book_name);
-						TextView authorTextView = (TextView) singleBook
-								.findViewById(R.id.single_book_author);
-						TextView userNameTextView = (TextView) singleBook
-								.findViewById(R.id.single_book_user);
-						titleTextView.setText(profile.getTypes().get("fav")
-								.get(j).getBookName());
-						authorTextView.setText(profile.getTypes().get("fav")
-								.get(j).getBookAuthor());
-						userNameTextView.setText(profile.getTypes().get("fav")
-								.get(j).getUserName());
-						imageView.setOnClickListener(new OnClickListener() {
 
-							@Override
-							public void onClick(View v) {
-								// startActivity(new Intent(Profile.this,
-								// Book.class));
-								new BookPagesAsyncTask(Profile.this, profile
-										.getTypes().get("uploads").get(finalJ)
-										.getBookName())
-										.execute(getBookPagesParams(String
-												.valueOf(profile.getTypes()
-														.get("fav").get(finalJ)
-														.getBookId())));
-							}
-						});
-						horizontal.addView(singleBook);
-					}
-				}
-			} else if (i == 2) {
-				textView.setText("private_lib");
-				Log.d(TAG, "rows==2");
-				if (profile.getTypes().get("private_lib") != null) {
-					LinearLayout horizontal = (LinearLayout) singleCategory
-							.findViewById(R.id.single_category_linearlayout_horizontal);
-					for (int j = 0; j < profile.getTypes().get("private_lib")
-							.size(); j++) {
-						final int finalJ = j;
-						View singleBook = mInflater.inflate(
-								R.layout.inflate_singlebook, null, false);
-						ImageView imageView = (ImageView) singleBook
-								.findViewById(R.id.single_book_cover);
-						if(profile.getTypes().get("private_lib").get(j).getImagebitmap()==null){
-						new BitmapAsyncTask(imageView,profile.getTypes().get("private_lib").get(j)).execute(profile
-								.getTypes().get("private_lib").get(j)
-								.getProfilePic());
-						}else{
-							imageView.setImageBitmap(profile.getTypes().get("private_lib").get(j).getImagebitmap());
-						}
-						TextView titleTextView = (TextView) singleBook
-								.findViewById(R.id.single_book_name);
-						TextView authorTextView = (TextView) singleBook
-								.findViewById(R.id.single_book_author);
-						TextView userNameTextView = (TextView) singleBook
-								.findViewById(R.id.single_book_user);
-						titleTextView.setText(profile.getTypes()
-								.get("private_lib").get(j).getBookName());
-						authorTextView.setText(profile.getTypes()
-								.get("private_lib").get(j).getBookAuthor());
-						userNameTextView.setText(profile.getTypes()
-								.get("private_lib").get(j).getUserName());
-						imageView.setOnClickListener(new OnClickListener() {
+				if (parentLinear != null) {
+					parentLinear.addView(singleCategory);
 
-							@Override
-							public void onClick(View v) {
-								// startActivity(new Intent(Profile.this,
-								// Book.class));
-								new BookPagesAsyncTask(Profile.this, profile
-										.getTypes().get("private_lib")
-										.get(finalJ).getBookName())
-										.execute(getBookPagesParams(String
-												.valueOf(profile.getTypes()
-														.get("private_lib")
-														.get(finalJ)
-														.getBookId())));
-
-							}
-						});
-						horizontal.addView(singleBook);
-					}
 				}
 			}
-
-			if (parentLinear != null) {
-				parentLinear.addView(singleCategory);
-
-			}
+			parentScroll.removeAllViews();
+			parentScroll.addView(parentLinear);
+			setContentView(parentScroll);
 		}
-		parentScroll.removeAllViews();
-		parentScroll.addView(parentLinear);
-		setContentView(parentScroll);
 
 	}
 
@@ -494,13 +372,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
 		} else if (id == R.id.name_account_menu) {
-			if (who == AppPreferences.FRIEND || who == AppPreferences.STRANGER) {
-				Intent intent = new Intent(this, Profile.class);
-				intent.putExtra(
-						AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
-						AppPreferences.SELF);
-				startActivity(intent);
-			}
+
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -636,6 +508,17 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				Log.d(TAG, "user_id->" + profile.getUser_name());
 				profile.setUser_email(userObject.getString("email"));
 				Log.d(TAG, "user_email->" + profile.getUser_email());
+				profile.setUser_pic(userObject.getString("user_pic"));
+				Log.d(TAG,
+						"profile pic set outside if->" + profile.getUser_pic());
+				if (profile.getUser_pic().contains("assets")) {
+					profile.setUser_pic("http://" + AppPreferences.ipAdd
+							+ "/eLibrary/library"
+							+ userObject.getString("user_pic"));
+					Log.d(TAG,
+							"profile pic set inside if assets->"
+									+ profile.getUser_pic());
+				}
 				if (userObject.getString("friendship") == null) {
 					profile.setFriendship("no");
 					Log.d(TAG, "friendship->" + profile.getFriendship());
@@ -654,6 +537,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					Log.d(TAG, "friendship->" + profile.getFriendship());
 				} else {
 					profile.setFriendship("no");
+					Log.d(TAG, "friendship->" + profile.getFriendship());
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -718,7 +602,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 	public class BitmapAsyncTask extends AsyncTask<String, Void, Bitmap> {
 		MyHolder holder;
-		LibraryModel model=null;
+		LibraryModel model = null;
 		ImageView view;
 
 		public BitmapAsyncTask(MyHolder holder) {
@@ -735,11 +619,11 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 		public BitmapAsyncTask(ImageView imageView, LibraryModel libraryModel) {
 			this.view = imageView;
-			this.model=libraryModel;
+			this.model = libraryModel;
 		}
 
 		public BitmapAsyncTask(ImageView profilePicImageView) {
-			this.view=profilePicImageView;
+			this.view = profilePicImageView;
 		}
 
 		@Override
@@ -765,7 +649,6 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				Bitmap myBitmap = BitmapFactory.decodeStream(input);
 				return myBitmap;
 			} catch (IOException e) {
-				// Log exception
 				return null;
 			}
 		}
@@ -774,7 +657,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		protected void onPostExecute(Bitmap result) {
 			if (result != null) {
 				result = getResizedBitmap(result, 300, 300);
-				if(model!=null){
+				if (model != null) {
 					model.setImagebitmap(result);
 				}
 				view.setImageBitmap(result);

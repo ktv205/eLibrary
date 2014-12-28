@@ -1,14 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
-    <Button
-        android:id="@+id/viewbook_button_read"
+    <LinearLayout
+        android:id="@+id/viewbook_linear_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/viewbook_imageview_bookcover"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/string_coverpic" >
+        </ImageView>
+
+        <LinearLayout
+            android:id="@+id/viewbook_linear_bookdetails"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/viewbook_textview_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/darkorange" />
+
+            <TextView
+                android:id="@+id/viewbook_textview_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/darkpurple" />
+
+            <TextView
+                android:id="@+id/viewbook_textview_user"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/darkgreen" />
+
+            <TextView
+                android:id="@+id/viewbook_textview_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_below="@id/viewbook_linear_details"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#000000" />
+
+    <TextView
+        android:id="@+id/viewbook_textview_popularity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="read book" >
-    </Button>
+        android:layout_below="@id/viewbook_linear_details"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="@string/string_popularity"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/darkred" />
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/viewbook_linear_popularitybar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/viewbook_textview_popularity"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal" >
+
+        <SeekBar
+            android:id="@+id/viewbook_seekbar_popularity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="12"
+            android:max="100" >
+        </SeekBar>
+
+        <TextView
+            android:id="@+id/viewbook_textview_percentage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <View
+        android:layout_below="@id/viewbook_linear_popularitybar"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#000000" />
+
+    <LinearLayout
+        android:id="@+id/viewbook_linear_bottombuttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/viewbook_button_back"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+             android:background="@color/darkred"
+            android:text="@string/string_goback"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#FFFFFF" >
+        </Button>
+
+        <Button
+            android:id="@+id/viewbook_button_read"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+           
+            android:background="@color/blue"
+            android:text="@string/string_readbook"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#FFFFFF" >
+        </Button>
+    </LinearLayout>
+
+</RelativeLayout>

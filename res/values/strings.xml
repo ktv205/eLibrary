@@ -48,6 +48,10 @@
     <string name="string_Reading">Reading</string>
     <string name="string_existing_text">Use an existing account</string>
     <string name="string_title">eLibrary</string>
+    <string name="string_readbook">Read this book</string>
+    <string name="string_goback">Go back</string>
+    <string name="string_coverpic">book cover picture</string>
+    <string name="string_popularity">Popularity</string>
     <string-array name="string_books_category">
         <item>biography</item>
     </string-array>

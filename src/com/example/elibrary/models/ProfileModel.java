@@ -13,6 +13,7 @@ public class ProfileModel implements Parcelable{
 	String user_name;
 	String user_email;
 	String friendship;
+	String user_pic;
 	ArrayList<LibraryModel> booklist=new ArrayList<LibraryModel>();
 	Map<String, ArrayList<LibraryModel>> types=new HashMap<String, ArrayList<LibraryModel>>();
 	public ProfileModel(Parcel source) {
@@ -21,6 +22,7 @@ public class ProfileModel implements Parcelable{
 		user_name=source.readString();
 		user_email=source.readString();
 		friendship=source.readString();
+		user_pic=source.readString();
 		booklist=source.readArrayList(ClassLoader.getSystemClassLoader());
 		types=source.readHashMap(ClassLoader.getSystemClassLoader());
 	}
@@ -70,6 +72,13 @@ public class ProfileModel implements Parcelable{
 	public void setBooklist(ArrayList<LibraryModel> booklist) {
 		this.booklist = booklist;
 	}
+	
+	public String getUser_pic() {
+		return user_pic;
+	}
+	public void setUser_pic(String user_pic) {
+		this.user_pic = user_pic;
+	}
 	@Override
 	public int describeContents() {
 		// TODO Auto-generated method stub
@@ -82,6 +91,7 @@ public class ProfileModel implements Parcelable{
 		dest.writeString(user_name);
 		dest.writeString(user_email);
 		dest.writeString(friendship);
+		dest.writeString(user_pic);
 		dest.writeList(booklist);
 		dest.writeMap(types);
 	}

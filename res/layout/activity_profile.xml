@@ -18,7 +18,7 @@
             <ImageView
                 android:id="@+id/profile_imageview_profilepic"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:contentDescription="@string/string_profile_picture"
                 android:src="@drawable/ic_launcher" />
@@ -58,24 +58,8 @@
         <View
             android:layout_width="fill_parent"
             android:layout_height="2dp"
-            android:background="#c0c0c0" />
-
-        <Button
-            android:id="@+id/profile_button_friend"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textColor="#FFFFFF"
-            android:background="@xml/mybutton" >
-        </Button>
-
-        <TextView
-            android:id="@+id/profile_textview_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/string_library"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:background="#c0c0c0"
+            android:layout_marginBottom="10dp" />
     </LinearLayout>
 
 </ScrollView>

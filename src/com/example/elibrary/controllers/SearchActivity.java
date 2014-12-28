@@ -14,10 +14,12 @@ import org.json.JSONObject;
 
 import com.example.elibrary.R;
 import com.example.elibrary.controllers.Logout.OnLogoutSuccessful;
+import com.example.elibrary.controllers.SearchActivity.BooksAdapter.BookHolder;
 import com.example.elibrary.controllers.SearchActivity.ToBeFriendsAdapter.MyHolder;
 import com.example.elibrary.models.AppPreferences;
 import com.example.elibrary.models.FriendsModel;
 import com.example.elibrary.models.LibraryModel;
+import com.example.elibrary.models.ProfileModel;
 import com.example.elibrary.models.RequestParams;
 import com.example.elibrary.models.ToBeFriendsModel;
 import com.google.android.gms.internal.ki;
@@ -34,6 +36,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.LiveFolders;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -59,6 +62,7 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 	private Context context;
 	private Menu menuGlobal;
 	private int auth;
+	private String queryGlobal;
 	private LayoutInflater mInflater;
 	private ArrayList<FriendsModel> friendsModel;
 	private ArrayList<LibraryModel> libraryModel;
@@ -77,7 +81,26 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				initialize();
+				// if (savedInstanceState != null) {
+				// queryWord.setText(savedInstanceState
+				// .getString("queryGlobal"));
+				// if (savedInstanceState
+				// .getParcelableArrayList("friendsModel") != null) {
+				// friendsModel = new ArrayList<FriendsModel>();
+				// friendsModel = savedInstanceState
+				// .getParcelableArrayList("friendsModel");
+				// fillFriends();
+				// } else if (savedInstanceState
+				// .getParcelableArray("libraryModel") != null) {
+				// libraryModel = new ArrayList<LibraryModel>();
+				// libraryModel = savedInstanceState
+				// .getParcelableArrayList("libraryModel");
+				// fillFriends();
+				// }
+				//
+				// } else {
 				handleIntent(getIntent());
+				// }
 				// trainingSet();
 			} else {
 				logout();
@@ -107,12 +130,10 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				//Intent intent = new Intent(SearchActivity.this, Book.class);
 				TextView bookId = (TextView) view
 						.findViewById(R.id.contents_list_books_search_textview_bookid);
-				// intent.putExtra("book_id", bookId.getText().toString());
-				// startActivity(intent);
-				new BookPagesAsyncTask().execute(getBookPagesParams(bookId.getText().toString()));
+				new ViewBookAsyncTask(SearchActivity.this,libraryModel.get(position).getProfilePic()).execute(getBookPagesParams(bookId
+						.getText().toString()));
 
 			}
 		});
@@ -183,6 +204,7 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 	private void handleIntent(Intent intent) {
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
 			String query = intent.getStringExtra(SearchManager.QUERY);
+			queryGlobal = query;
 			if (intent.getExtras().containsKey(
 					AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE)) {
 				searchType = intent.getExtras().getInt(
@@ -212,6 +234,19 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			MenuItem item = menuGlobal.findItem(R.id.name_account_menu);
 			item.setTitle(authPref.getString(AppPreferences.Auth.KEY_NAME,
 					"Name"));
+		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		if (outState == null) {
+			if (friendsModel != null) {
+				outState.putParcelableArrayList("friendsModel", friendsModel);
+			} else if (libraryModel != null) {
+				outState.putParcelableArrayList("libraryModel", libraryModel);
+			}
+			outState.putString("queryGlobal", queryGlobal);
+			super.onSaveInstanceState(outState);
 		}
 	}
 
@@ -259,8 +294,6 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 		int id = item.getItemId();
 		if (id == R.id.name_account_menu) {
 			Intent intent = new Intent(this, Profile.class);
-			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
-					AppPreferences.SELF);
 			startActivity(intent);
 		} else if (id == R.id.settings_logout) {
 			Log.d(TAG, "clicked logout");
@@ -327,6 +360,12 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 									.getString("user_id")));
 							model.setProfilePic(userObject
 									.getString("user_pic"));
+							if (model.getProfilePic().contains("assets")) {
+								model.setProfilePic("http://"
+										+ AppPreferences.ipAdd
+										+ "/eLibrary/library"
+										+ model.getProfilePic());
+							}
 							friendsModel.add(model);
 						}
 
@@ -473,9 +512,8 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			myHolder.email.setText(toBeFriendsList.get(position).getEmail());
 			myHolder.userId.setText(String.valueOf(toBeFriendsList
 					.get(position).getId()));
-			// new
-			// BitmapAsyncTask(myHolder).execute(toBeFriendsList.get(position)
-			// .getProfilePic());
+			new BitmapAsyncTask(myHolder).execute(toBeFriendsList.get(position)
+					.getProfilePic());
 
 			return view;
 		}
@@ -525,25 +563,25 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
-			BookHolder myHolder;
+			BookHolder bookHolder;
 			if (view == null) {
 				LayoutInflater inflater = LayoutInflater
 						.from(SearchActivity.this);
 				view = inflater.inflate(R.layout.contents_list_books_search,
 						parent, false);
-				myHolder = new BookHolder(view);
-				view.setTag(myHolder);
+				bookHolder = new BookHolder(view);
+				view.setTag(bookHolder);
 			} else {
-				myHolder = (BookHolder) view.getTag();
+				bookHolder = (BookHolder) view.getTag();
 
 			}
-			myHolder.title.setText(libraryModel.get(position).getBookName());
-			myHolder.author.setText(libraryModel.get(position).getBookAuthor());
-			myHolder.bookId.setText(String.valueOf(libraryModel.get(position)
+			bookHolder.title.setText(libraryModel.get(position).getBookName());
+			bookHolder.author.setText(libraryModel.get(position)
+					.getBookAuthor());
+			bookHolder.bookId.setText(String.valueOf(libraryModel.get(position)
 					.getBookId()));
-			// new
-			// BitmapAsyncTask(BookHolder).execute(toBeFriendsList.get(position)
-			// .getProfilePic());
+			new BitmapAsyncTask(bookHolder).execute(libraryModel.get(position)
+					.getProfilePic());
 
 			return view;
 		}
@@ -568,9 +606,14 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 
 	public class BitmapAsyncTask extends AsyncTask<String, Void, Bitmap> {
 		MyHolder holder;
+		BookHolder bookHolder;
 
 		public BitmapAsyncTask(MyHolder holder) {
 			this.holder = holder;
+		}
+
+		public BitmapAsyncTask(BookHolder bookHolder) {
+			this.bookHolder = bookHolder;
 		}
 
 		@Override
@@ -602,7 +645,11 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
-			holder.profilePic.setImageBitmap(result);
+			if (holder != null) {
+				holder.profilePic.setImageBitmap(result);
+			} else {
+				bookHolder.coverPic.setImageBitmap(result);
+			}
 		}
 	}
 
@@ -610,34 +657,6 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 	public void onCleardFields(boolean cleared) {
 		if (cleared) {
 			logout();
-		}
-
-	}
-
-	public class BookPagesAsyncTask extends
-			AsyncTask<RequestParams, Void, String> {
-		ProgressDialog dialog;
-
-		@Override
-		protected void onPreExecute() {
-			dialog = new ProgressDialog(SearchActivity.this);
-			dialog.show();
-		}
-
-		@Override
-		protected String doInBackground(RequestParams... params) {
-			// TODO Auto-generated method stub
-			return new HttpManager().sendUserData(params[0]);
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			dialog.dismiss();
-			Log.d(TAG, "result->" + result);
-			Intent intent = new Intent(SearchActivity.this, Book.class);
-			intent.putExtra("book", result);
-			SearchActivity.this.startActivity(intent);
-
 		}
 
 	}

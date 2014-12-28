@@ -90,11 +90,12 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				initialize();
-				if(savedInstanceState==null){
-				new GetUploadHistoryAsycTask().execute(getRequestParams());
-				}else{
-					libraryModel=new ArrayList<LibraryModel>();
-					libraryModel=savedInstanceState.getParcelableArrayList("uploadhistory");
+				if (savedInstanceState == null) {
+					new GetUploadHistoryAsycTask().execute(getRequestParams());
+				} else {
+					libraryModel = new ArrayList<LibraryModel>();
+					libraryModel = savedInstanceState
+							.getParcelableArrayList("uploadhistory");
 					fillBooks();
 				}
 				// fillBooks();
@@ -171,10 +172,10 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 					.findViewById(R.id.single_book_cover);
 			// imageView.setImageBitmap(profile.getTypes().get("uploads")
 			// .get(j).getImagebitmap());
-			if(libraryModel.get(j).getImagebitmap()==null){
-			new BitmapAsyncTask(imageView,libraryModel.get(j)).execute(libraryModel.get(j)
-					.getProfilePic());
-			}else{
+			if (libraryModel.get(j).getImagebitmap() == null) {
+				new BitmapAsyncTask(imageView, libraryModel.get(j))
+						.execute(libraryModel.get(j).getProfilePic());
+			} else {
 				imageView.setImageBitmap(libraryModel.get(j).getImagebitmap());
 			}
 			TextView titleTextView = (TextView) singleBook
@@ -191,8 +192,10 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				@Override
 				public void onClick(View v) {
 					// startActivity(new Intent(Uploads.this, Book.class));
-					new BookPagesAsyncTask().execute(getBookPagesParams(String
-							.valueOf(libraryModel.get(finalJ).getBookId())));
+					new ViewBookAsyncTask(Uploads.this,libraryModel.get(finalJ).getProfilePic())
+							.execute(getBookPagesParams(String
+									.valueOf(libraryModel.get(finalJ)
+											.getBookId())));
 				}
 			});
 			horizontal.addView(singleBook);
@@ -263,11 +266,13 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		setMenuName();
 		return true;
 	}
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-    	outState.putParcelableArrayList("uploadhistory", libraryModel);
-    	super.onSaveInstanceState(outState);
-    }
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putParcelableArrayList("uploadhistory", libraryModel);
+		super.onSaveInstanceState(outState);
+	}
+
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
@@ -295,9 +300,6 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			startActivity(new Intent(this, MainActivity.class));
 		} else if (id == R.id.name_account_menu) {
 			Intent intent = new Intent(this, Profile.class);
-			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
-					AppPreferences.SELF);
-			startActivity(intent);
 			startActivity(intent);
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
@@ -611,7 +613,7 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 
 		public BitmapAsyncTask(ImageView imageView, LibraryModel libraryModel) {
 			this.view = imageView;
-			this.libraryModel=libraryModel;
+			this.libraryModel = libraryModel;
 		}
 
 		@Override
@@ -652,33 +654,4 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 
 		}
 	}
-
-	public class BookPagesAsyncTask extends
-			AsyncTask<RequestParams, Void, String> {
-		ProgressDialog dialog;
-
-		@Override
-		protected void onPreExecute() {
-			dialog = new ProgressDialog(Uploads.this);
-			dialog.show();
-		}
-
-		@Override
-		protected String doInBackground(RequestParams... params) {
-			// TODO Auto-generated method stub
-			return new HttpManager().sendUserData(params[0]);
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			dialog.dismiss();
-			Log.d(TAG, "result->" + result);
-			Intent intent = new Intent(Uploads.this, Book.class);
-			intent.putExtra("book", result);
-			Uploads.this.startActivity(intent);
-
-		}
-
-	}
-
 }
