@@ -14,8 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-
-public class Authentication extends Activity{
+public class Authentication extends Activity {
 	private static final String TAG = "Authentication";
 	private Context context;
 	private LayoutInflater mInflater;
@@ -33,36 +32,42 @@ public class Authentication extends Activity{
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (CheckConnection.isConnected(context)) {
-			Button signInButton = (Button) findViewById(R.id.authentication_button_signin);
-			Button signUpButton = (Button) findViewById(R.id.authentication_button_signup);
-			signInButton.setOnClickListener(new OnClickListener() {
+			if (CheckAuthentication.checkForAuthentication(context)) {
+				startActivity(new Intent(this, MainActivity.class));
+			} else {
+				Button signInButton = (Button) findViewById(R.id.authentication_button_signin);
+				Button signUpButton = (Button) findViewById(R.id.authentication_button_signup);
+				signInButton.setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View v) {
-					Intent intent = new Intent(Authentication.this,
-							Signin.class);
-					intent.putExtra(AppPreferences.AUTH_KEY,
-							AppPreferences.SIGNIN);
-					edit.putInt(AppPreferences.AUTH_KEY, AppPreferences.SIGNIN);
-					edit.commit();
-					startActivity(intent);
+					@Override
+					public void onClick(View v) {
+						Intent intent = new Intent(Authentication.this,
+								Signin.class);
+						intent.putExtra(AppPreferences.AUTH_KEY,
+								AppPreferences.SIGNIN);
+						edit.putInt(AppPreferences.AUTH_KEY,
+								AppPreferences.SIGNIN);
+						edit.commit();
+						startActivity(intent);
 
-				}
-			});
-			signUpButton.setOnClickListener(new OnClickListener() {
+					}
+				});
+				signUpButton.setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View v) {
-					Intent intent = new Intent(Authentication.this,
-							Signup.class);
-					intent.putExtra(AppPreferences.AUTH_KEY,
-							AppPreferences.SIGNUP);
-					edit.putInt(AppPreferences.AUTH_KEY, AppPreferences.SIGNUP);
-					edit.commit();
-					startActivity(intent);
+					@Override
+					public void onClick(View v) {
+						Intent intent = new Intent(Authentication.this,
+								Signup.class);
+						intent.putExtra(AppPreferences.AUTH_KEY,
+								AppPreferences.SIGNUP);
+						edit.putInt(AppPreferences.AUTH_KEY,
+								AppPreferences.SIGNUP);
+						edit.commit();
+						startActivity(intent);
 
-				}
-			});
+					}
+				});
+			}
 		} else {
 			noConnectionView();
 		}
@@ -72,7 +77,10 @@ public class Authentication extends Activity{
 	protected void onResume() {
 		super.onResume();
 		if (CheckConnection.isConnected(context)) {
-               
+			if (CheckAuthentication.checkForAuthentication(context)) {
+				startActivity(new Intent(this, MainActivity.class));
+			}
+
 		} else {
 			noConnectionView();
 		}

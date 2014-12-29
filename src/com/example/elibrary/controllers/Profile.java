@@ -162,7 +162,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				R.layout.inflate_contents_profile, null, false);
 		TextView friendProfileTextView = (TextView) friendProfileContents
 				.findViewById(R.id.contents_profile_textview_text);
-		Button friendProfileButton = (Button) friendProfileContents
+		final Button friendProfileButton = (Button) friendProfileContents
 				.findViewById(R.id.contents_profile_button_friend);
 		if (profile.getFriendship().equals("no")) {
 			friendProfileTextView
@@ -197,10 +197,12 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					new SendFriendRequestAsyncTask()
 							.execute(getFriendRequestParams("add_friend",
 									String.valueOf(profile.getUser_id())));
+					friendProfileButton.setText("pending");
 				} else if (profile.getFriendship().equals("withheld")) {
 					new SendFriendRequestAsyncTask()
 							.execute(getFriendRequestParams("accept_friend",
 									String.valueOf(profile.getUser_id())));
+					friendProfileButton.setText("friends");
 				}
 
 			}
