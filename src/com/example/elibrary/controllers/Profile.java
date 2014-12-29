@@ -145,6 +145,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 	@SuppressLint("InflateParams")
 	public void fillBooks() {
+		int rows = 1;
 		nameTextView.setText(profile.getUser_name());
 		emailTextView.setText(profile.getUser_email());
 		booksUploadedTextView.append(" "
@@ -168,19 +169,25 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					.setText("Do you want to send a friend request?");
 			friendProfileButton.setText("add friend");
 			parentLinear.addView(friendProfileContents);
+			rows = 2;
 		} else if (profile.getFriendship().equals("withheld")) {
 			friendProfileTextView.setText("Respond to a friend request");
 			friendProfileButton.setText("respond");
 			parentLinear.addView(friendProfileContents);
+			rows = 2;
 		} else if (profile.getFriendship().equals("pending")) {
 			friendProfileTextView
 					.setText("waiting for the person to accept your friend request");
 			friendProfileButton.setText("pending");
 			parentLinear.addView(friendProfileContents);
+			rows = 2;
 		} else if (profile.getFriendship().equals("friend")) {
 			friendProfileTextView.setText("You are friends with this person");
 			friendProfileButton.setText("remove friend");
 			parentLinear.addView(friendProfileContents);
+			rows = 2;
+		} else if (profile.getFriendship().equals("self")) {
+			rows = 3;
 		}
 		friendProfileButton.setOnClickListener(new OnClickListener() {
 
@@ -204,7 +211,6 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				.findViewById(R.id.profile_title_textview);
 		titleLibraryTextView.setText("Library");
 		parentLinear.addView(libraryTitleView);
-		int rows = 1;
 
 		for (int i = 0; i < rows; i++) {
 			Log.d(TAG, "inside rows for loop");
@@ -213,90 +219,118 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 			TextView textView = (TextView) singleCategory
 					.findViewById(R.id.single_category_textview_book_category);
 			if (i == 0) {
-				Log.d(TAG, "rows==0");
-				textView.setText("uploads");
-				LinearLayout horizontal = (LinearLayout) singleCategory
-						.findViewById(R.id.single_category_linearlayout_horizontal);
-				for (int j = 0; j < profile.getTypes().get("uploads").size(); j++) {
-					final int finalJ = j;
-					View singleBook = mInflater.inflate(
-							R.layout.inflate_singlebook, null, false);
-					ImageView imageView = (ImageView) singleBook
-							.findViewById(R.id.single_book_cover);
-					if (profile.getTypes().get("uploads").get(j)
-							.getImagebitmap() == null) {
-						new BitmapAsyncTask(imageView, profile.getTypes()
-								.get("uploads").get(j)).execute(profile
-								.getTypes().get("uploads").get(j)
-								.getProfilePic());
-					} else {
-						imageView.setImageBitmap(profile.getTypes()
-								.get("uploads").get(j).getImagebitmap());
-					}
-					TextView titleTextView = (TextView) singleBook
-							.findViewById(R.id.single_book_name);
-					TextView authorTextView = (TextView) singleBook
-							.findViewById(R.id.single_book_author);
-					TextView userNameTextView = (TextView) singleBook
-							.findViewById(R.id.single_book_user);
-					titleTextView.setText(profile.getTypes().get("uploads")
-							.get(j).getBookName());
-					authorTextView.setText(profile.getTypes().get("uploads")
-							.get(j).getBookAuthor());
-					userNameTextView.setText(profile.getTypes().get("uploads")
-							.get(j).getUserName());
-					imageView.setOnClickListener(new OnClickListener() {
-
-						@Override
-						public void onClick(View v) {
-							new ViewBookAsyncTask(Profile.this, profile
-									.getTypes().get("uploads").get(finalJ)
-									.getProfilePic())
-									.execute(getBookPagesParams(String
-											.valueOf(profile.getTypes()
-													.get("uploads").get(finalJ)
-													.getBookId())));
-						}
-					});
-					horizontal.addView(singleBook);
-				}
-
-				if (parentLinear != null) {
-					parentLinear.addView(singleCategory);
-					if (profile.getTypes().get("uploads").size() == 0) {
-						View uploadsEmptyView = mInflater.inflate(
-								R.layout.contents_empty_uploads, null, false);
-						TextView text = (TextView) uploadsEmptyView
-								.findViewById(R.id.empty_uploads_textview_text);
-						Button button = (Button) uploadsEmptyView
-								.findViewById(R.id.empty_uploads_button_friend);
-						if (profile.getFriendship().equals("self")) {
-							text.setText("Start uploading books");
-							button.setText("upload a book");
-						} else {
-							button.setVisibility(View.GONE);
-							text.setText("No uploads to show");
-						}
-						button.setOnClickListener(new OnClickListener() {
-
-							@Override
-							public void onClick(View v) {
-								startActivity(new Intent(Profile.this,
-										Uploads.class));
-
-							}
-						});
-						parentLinear.addView(uploadsEmptyView);
-
-					}
-					View singleLineView = mInflater.inflate(
-							R.layout.inflate_divide_line, null, false);
-					parentLinear.addView(singleLineView);
-				}
-			}
+				setEachCategory("uploads", textView, singleCategory);
+			} else if (i == 1) {
+				setEachCategory("favourites", textView, singleCategory);
+			} else if (i == 2) {
+			 setEachCategory("private", textView, singleCategory);
+			 }
 			parentScroll.removeAllViews();
 			parentScroll.addView(parentLinear);
 			setContentView(parentScroll);
+		}
+
+	}
+
+	public void setEachCategory(final String category, TextView textView,
+			View singleCategory) {
+
+		Log.d(TAG, "rows==0");
+		Log.d(TAG,"category->"+category);
+		textView.setText(category);
+		LinearLayout horizontal = (LinearLayout) singleCategory
+				.findViewById(R.id.single_category_linearlayout_horizontal);
+		for (int j = 0; j < profile.getTypes().get(category).size(); j++) {
+			final int finalJ = j;
+			View singleBook = mInflater.inflate(R.layout.inflate_singlebook,
+					null, false);
+			ImageView imageView = (ImageView) singleBook
+					.findViewById(R.id.single_book_cover);
+			if (profile.getTypes().get(category).get(j).getImagebitmap() == null) {
+				new BitmapAsyncTask(imageView, profile.getTypes().get(category)
+						.get(j)).execute(profile.getTypes().get(category)
+						.get(j).getProfilePic());
+			} else {
+				imageView.setImageBitmap(profile.getTypes().get(category)
+						.get(j).getImagebitmap());
+			}
+			TextView titleTextView = (TextView) singleBook
+					.findViewById(R.id.single_book_name);
+			TextView authorTextView = (TextView) singleBook
+					.findViewById(R.id.single_book_author);
+			TextView userNameTextView = (TextView) singleBook
+					.findViewById(R.id.single_book_user);
+			titleTextView.setText(profile.getTypes().get(category).get(j)
+					.getBookName());
+			authorTextView.setText(profile.getTypes().get(category).get(j)
+					.getBookAuthor());
+			userNameTextView.setText(profile.getTypes().get(category).get(j)
+					.getUserName());
+			imageView.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					new ViewBookAsyncTask(Profile.this, profile.getTypes()
+							.get(category).get(finalJ).getProfilePic())
+							.execute(getBookPagesParams(String.valueOf(profile
+									.getTypes().get(category).get(finalJ)
+									.getBookId())));
+				}
+			});
+			horizontal.addView(singleBook);
+		}
+
+		if (parentLinear != null) {
+			parentLinear.addView(singleCategory);
+			if (profile.getTypes().get(category).size() == 0) {
+
+				View uploadsEmptyView = mInflater.inflate(
+						R.layout.contents_empty_uploads, null, false);
+				TextView text = (TextView) uploadsEmptyView
+						.findViewById(R.id.empty_uploads_textview_text);
+				final Button button = (Button) uploadsEmptyView
+						.findViewById(R.id.empty_uploads_button_friend);
+				if (profile.getFriendship().equals("self")) {
+					if (category.equals("uploads")) {
+						text.setText("Start uploading books");
+						button.setText("upload a book");
+					} else if (category.equals("favourites")) {
+						text.setText("No favourites,start Reading");
+						button.setText("library");
+					} else if (category.equals("private")) {
+						text.setText("No private books");
+						button.setVisibility(View.GONE);
+					}
+				} else {
+					button.setVisibility(View.GONE);
+					if (category.equals("uploads")) {
+						text.setText("No uploads to show");
+					} else if (category.equals("favourites")) {
+						text.setText("No favourites to show");
+					}
+				}
+				button.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Log.d(TAG, "in onclick");
+						if (button.getText().toString().equals("upload a book")) {
+							startActivity(new Intent(Profile.this,
+									Uploads.class));
+						} else if (button.getText().toString()
+								.equals("library")) {
+							startActivity(new Intent(Profile.this,
+									MainActivity.class));
+						}
+
+					}
+				});
+				parentLinear.addView(uploadsEmptyView);
+
+			}
+			View singleLineView = mInflater.inflate(
+					R.layout.inflate_divide_line, null, false);
+			parentLinear.addView(singleLineView);
 		}
 
 	}
@@ -507,17 +541,13 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 					JSONArray favouriteArray = userLibObject
 							.getJSONArray("fav");
 					Log.d(TAG, "fav size->" + favouriteArray.length());
-					if (favouriteArray.length() > 0) {
-						getBooksInfo(favouriteArray, "fav", bookMap);
-					}
+						getBooksInfo(favouriteArray, "favourites", bookMap);
 					if (profile.getFriendship().equals("self")) {
 						Log.d(TAG, "friendShip is self");
 						JSONArray privateArray = userLibObject
 								.getJSONArray("private_lib");
 						Log.d(TAG, "fav size->" + privateArray.length());
-						if (privateArray.length() > 0) {
-							getBooksInfo(privateArray, "private_lib", bookMap);
-						}
+							getBooksInfo(privateArray, "private", bookMap);
 					}
 					profile.setTypes(bookMap);
 
@@ -623,7 +653,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
+           Log.d(TAG,"category in post->"+category);
 			bookMap.put(category, books);
 		}
 	}
