@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -55,6 +56,7 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 	private static final String TAG = "Friends";
 	private ListView friendsListView;
 	private ArrayList<FriendsModel> friendsList;
+	private int arraySize;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,31 +71,36 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		if (CheckConnection.isConnected(context)) {
 			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
-				trainingSet();
+				// trainingSet();
 				setMenuName();
-				new FriendsAsyncTask().execute(getRequestParams());
+				if (savedInstanceState != null) {
+					if (savedInstanceState
+							.getParcelableArrayList("friendsModel") != null) {
+						friendsList = savedInstanceState
+								.getParcelableArrayList("friendsModel");
+						fillWithFriends();
+					}
+				} else {
+					new FriendsAsyncTask().execute(getRequestParams());
+				}
+
 			} else {
 				logout();
 			}
 		}
 	}
 
-	public void trainingSet() {
+	public void fillWithFriends() {
 		friendsListView = (ListView) findViewById(R.id.friends_listview_friends);
-		FriendsModel obj = new FriendsModel();
-		obj.setEmail("example@example.com");
-		obj.setName("example");
-		obj.setProfilePic("https://graph.facebook.com/100000236193433/picture?type=normal");
-		friendsList = new ArrayList<FriendsModel>();
-		friendsList.add(obj);
 		FriendsListAdapter adapter = new FriendsListAdapter(friendsList);
 		friendsListView.setAdapter(adapter);
 		friendsListView.setOnItemClickListener(new OnItemClickListener() {
-
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				Intent intent = new Intent(Friends.this, Profile.class);
+				intent.putExtra("to_user_id",
+						String.valueOf(friendsList.get(position).getId()));
 				startActivity(intent);
 
 			}
@@ -131,6 +138,15 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 		} else {
 			noConnectionView();
 		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		if (friendsList != null) {
+			outState.putParcelableArrayList("friendsModel", friendsList);
+			Log.d(TAG, "onSavedInstace method->friendsModel");
+		}
+		super.onSaveInstanceState(outState);
 	}
 
 	@SuppressLint("InflateParams")
@@ -171,6 +187,23 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 			item.setTitle(authPref.getString(AppPreferences.Auth.KEY_NAME,
 					"Name"));
 		}
+	}
+
+	public RequestParams getFriendRequestParams(String to_user_id) {
+		Log.d(TAG, "getParams()");
+		RequestParams params = new RequestParams();
+		params.setMethod("GET");
+		params.setURI("http://" + AppPreferences.ipAdd
+				+ "/eLibrary/library/index.php/profile");
+		params.setParam("user_id", String.valueOf(authPref.getInt(
+				AppPreferences.Auth.KEY_USERID, -1)));
+		params.setParam("user", to_user_id);
+		params.setParam("mobile", "1");
+		Log.d(TAG,
+				"user_id->"
+						+ authPref.getInt(AppPreferences.Auth.KEY_USERID, -1));
+		return params;
+
 	}
 
 	@Override
@@ -225,9 +258,12 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 
 	public class FriendsAsyncTask extends
 			AsyncTask<RequestParams, Void, String> {
+		ProgressDialog dialog;
+
 		@Override
 		protected void onPreExecute() {
-			// TODO Auto-generated method stub
+			dialog = new ProgressDialog(Friends.this);
+			dialog.show();
 			super.onPreExecute();
 		}
 
@@ -239,25 +275,39 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 
 		@Override
 		protected void onPostExecute(String result) {
+			dialog.dismiss();
 			Log.d(TAG, "result->" + result);
-			// JSONObject mainObject;
-			// try {
-			// mainObject = new JSONObject(result);
-			// int success=mainObject.getInt("success");
-			// if(success==1){
-			// JSONArray friendArray=mainObject.getJSONArray("friendlist");
-			// int length=friendArray.length();
-			// if(length==0){
-			// TextView text=new TextView(Friends.this);
-			// text.setText("No friends");
-			// Friends.this.setContentView(text);
-			//
-			// }
-			// }
-			// } catch (JSONException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
+			JSONObject mainObject;
+			try {
+				mainObject = new JSONObject(result);
+				int success = mainObject.getInt("success");
+				if (success == 1) {
+					JSONArray friendArray = mainObject
+							.getJSONArray("friendlist");
+					int length = friendArray.length();
+					if (length == 0) {
+						TextView text = new TextView(Friends.this);
+						text.setText("No friends");
+						Friends.this.setContentView(text);
+
+					} else {
+						Log.d(TAG, "length of friends->" + length);
+						friendsList = new ArrayList<FriendsModel>();
+						arraySize = length;
+						for (int i = 0; i < length; i++) {
+							JSONObject friendObject = friendArray
+									.getJSONObject(i);
+							String user_id = friendObject.getString("user_id");
+							new GetProfileAsyncTask()
+									.execute(getFriendRequestParams(user_id));
+
+						}
+
+					}
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 
 		}
 
@@ -317,9 +367,13 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 			}
 			myHolder.name.setText(friendsList.get(position).getName());
 			myHolder.email.setText(friendsList.get(position).getEmail());
-			new BitmapAsyncTask(myHolder).execute(friendsList.get(position)
-					.getProfilePic());
-
+			if (friendsList.get(position).getProfilePicBitmap() == null) {
+				new BitmapAsyncTask(myHolder, friendsList.get(position))
+						.execute(friendsList.get(position).getProfilePic());
+			} else {
+				myHolder.profilePic.setImageBitmap(friendsList.get(position)
+						.getProfilePicBitmap());
+			}
 			return view;
 		}
 
@@ -341,9 +395,11 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 
 		public class BitmapAsyncTask extends AsyncTask<String, Void, Bitmap> {
 			MyHolder holder;
+			FriendsModel friend;
 
-			public BitmapAsyncTask(MyHolder holder) {
+			public BitmapAsyncTask(MyHolder holder, FriendsModel friend) {
 				this.holder = holder;
+				this.friend = friend;
 			}
 
 			@Override
@@ -375,8 +431,72 @@ public class Friends extends Activity implements OnLogoutSuccessful {
 
 			@Override
 			protected void onPostExecute(Bitmap result) {
-				holder.profilePic.setImageBitmap(result);
+				if (result != null) {
+					holder.profilePic.setImageBitmap(result);
+					friend.setProfilePicBitmap(result);
+				}
+
 			}
+		}
+
+	}
+
+	public class GetProfileAsyncTask extends
+			AsyncTask<RequestParams, Void, String> {
+		ProgressDialog dialog;
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(Friends.this);
+			dialog.show();
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(RequestParams... params) {
+			return new HttpManager().sendUserData(params[0]);
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			dialog.dismiss();
+			Log.d(TAG, result);
+			JSONObject mainObject = null;
+			try {
+				mainObject = new JSONObject(result);
+				int success = mainObject.getInt("success");
+				Log.d(TAG, "id->" + success);
+				if (success == 1) {
+					getUserInfo(mainObject);
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void getUserInfo(JSONObject mainObject) {
+		FriendsModel friend = new FriendsModel();
+		JSONObject userObject;
+		try {
+			userObject = mainObject.getJSONObject("user");
+			friend.setName(userObject.getString("user_name"));
+			friend.setId(Integer.valueOf(userObject.getString("user_id")));
+			friend.setProfilePic(userObject.getString("user_pic"));
+			if (friend.getProfilePic().contains("assets")) {
+				friend.setProfilePic("http://" + AppPreferences.ipAdd
+						+ "/eLibrary/library"
+						+ userObject.getString("user_pic"));
+			}
+			friend.setEmail(userObject.getString("email"));
+			friendsList.add(friend);
+			if (friendsList.size() == arraySize) {
+				fillWithFriends();
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}

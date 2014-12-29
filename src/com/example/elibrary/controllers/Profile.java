@@ -207,7 +207,6 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		int rows = 1;
 
 		for (int i = 0; i < rows; i++) {
-
 			Log.d(TAG, "inside rows for loop");
 			View singleCategory = mInflater.inflate(
 					R.layout.inflate_single_category, null, false);
@@ -250,7 +249,9 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 						@Override
 						public void onClick(View v) {
-							new ViewBookAsyncTask(Profile.this,profile.getTypes().get("uploads").get(finalJ).getProfilePic())
+							new ViewBookAsyncTask(Profile.this, profile
+									.getTypes().get("uploads").get(finalJ)
+									.getProfilePic())
 									.execute(getBookPagesParams(String
 											.valueOf(profile.getTypes()
 													.get("uploads").get(finalJ)
@@ -262,7 +263,35 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 				if (parentLinear != null) {
 					parentLinear.addView(singleCategory);
+					if (profile.getTypes().get("uploads").size() == 0) {
+						View uploadsEmptyView = mInflater.inflate(
+								R.layout.contents_empty_uploads, null, false);
+						TextView text = (TextView) uploadsEmptyView
+								.findViewById(R.id.empty_uploads_textview_text);
+						Button button = (Button) uploadsEmptyView
+								.findViewById(R.id.empty_uploads_button_friend);
+						if (profile.getFriendship().equals("self")) {
+							text.setText("Start uploading books");
+							button.setText("upload a book");
+						} else {
+							button.setVisibility(View.GONE);
+							text.setText("No uploads to show");
+						}
+						button.setOnClickListener(new OnClickListener() {
 
+							@Override
+							public void onClick(View v) {
+								startActivity(new Intent(Profile.this,
+										Uploads.class));
+
+							}
+						});
+						parentLinear.addView(uploadsEmptyView);
+
+					}
+					View singleLineView = mInflater.inflate(
+							R.layout.inflate_divide_line, null, false);
+					parentLinear.addView(singleLineView);
 				}
 			}
 			parentScroll.removeAllViews();
@@ -372,7 +401,12 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
 		} else if (id == R.id.name_account_menu) {
-
+			if (profile.getFriendship().equals("self")) {
+				startActivity(new Intent(this, Profile.class));
+			}
+		} else if (id == R.id.settings_reload) {
+			startActivity(new Intent(this, Profile.class));
+			finish();
 		}
 		return super.onOptionsItemSelected(item);
 	}

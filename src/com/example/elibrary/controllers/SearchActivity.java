@@ -36,7 +36,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.LiveFolders;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -71,37 +70,16 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_search);
-		Log.d(TAG, "onCreate");
 		context = getApplicationContext();
 		authPref = MySharedPreferences.getSharedPreferences(context,
 				AppPreferences.Auth.AUTHPREF);
 		mInflater = (LayoutInflater) this
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (CheckConnection.isConnected(context)) {
-			Log.d(TAG, "internet connected");
 			if (CheckAuthentication.checkForAuthentication(context)) {
 				initialize();
-				// if (savedInstanceState != null) {
-				// queryWord.setText(savedInstanceState
-				// .getString("queryGlobal"));
-				// if (savedInstanceState
-				// .getParcelableArrayList("friendsModel") != null) {
-				// friendsModel = new ArrayList<FriendsModel>();
-				// friendsModel = savedInstanceState
-				// .getParcelableArrayList("friendsModel");
-				// fillFriends();
-				// } else if (savedInstanceState
-				// .getParcelableArray("libraryModel") != null) {
-				// libraryModel = new ArrayList<LibraryModel>();
-				// libraryModel = savedInstanceState
-				// .getParcelableArrayList("libraryModel");
-				// fillFriends();
-				// }
-				//
-				// } else {
-				handleIntent(getIntent());
-				// }
-				// trainingSet();
+			    handleIntent(getIntent());
+				
 			} else {
 				logout();
 			}
@@ -132,8 +110,9 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 					int position, long id) {
 				TextView bookId = (TextView) view
 						.findViewById(R.id.contents_list_books_search_textview_bookid);
-				new ViewBookAsyncTask(SearchActivity.this,libraryModel.get(position).getProfilePic()).execute(getBookPagesParams(bookId
-						.getText().toString()));
+				new ViewBookAsyncTask(SearchActivity.this, libraryModel.get(
+						position).getProfilePic())
+						.execute(getBookPagesParams(bookId.getText().toString()));
 
 			}
 		});
@@ -152,8 +131,6 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 				String toUserId = userIdTextView.getText().toString();
 				Intent intent = new Intent(SearchActivity.this, Profile.class);
 				intent.putExtra("to_user_id", toUserId);
-				// intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_WHO_PROFILE,
-				// AppPreferences.S);
 				startActivity(intent);
 			}
 		});
@@ -179,9 +156,7 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 
 	@Override
 	public void startActivity(Intent intent) {
-		Log.d(TAG, "onStartActivity");
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			Log.d(TAG, "intent.getAction");
 			intent.putExtra(AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE,
 					searchType);
 		}
@@ -196,7 +171,6 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		Log.d(TAG, "onNewIntent");
 		handleIntent(intent);
 
 	}
@@ -211,45 +185,27 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 						AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE);
 				if (intent.getExtras().getInt(
 						AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE) == AppPreferences.BOOKSEARCH) {
-					Log.d(TAG, "bookSearch");
 					getActionBar().setTitle("Book Search");
 					new BookSearchAsyncTask().execute(getRequestParams(query,
 							searchType));
 				} else if (intent.getExtras().getInt(
 						AppPreferences.PutExtraKeys.PUTEXTRA_SEARCHTYPE) == AppPreferences.FRIENDSEARCH) {
-					Log.d(TAG, "friendsSearch");
 					getActionBar().setTitle("Friend Search");
 					new GetToBeFriendsAsyncTask().execute(getRequestParams(
 							query, searchType));
 				}
 			}
 			queryWord.setText(query);
-			Log.d(TAG, query);
 		}
 	}
 
 	public void setMenuName() {
-		Log.d(TAG, "setMenuName");
 		if (menuGlobal != null) {
 			MenuItem item = menuGlobal.findItem(R.id.name_account_menu);
 			item.setTitle(authPref.getString(AppPreferences.Auth.KEY_NAME,
 					"Name"));
 		}
 	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		if (outState == null) {
-			if (friendsModel != null) {
-				outState.putParcelableArrayList("friendsModel", friendsModel);
-			} else if (libraryModel != null) {
-				outState.putParcelableArrayList("libraryModel", libraryModel);
-			}
-			outState.putString("queryGlobal", queryGlobal);
-			super.onSaveInstanceState(outState);
-		}
-	}
-
 	public RequestParams getRequestParams(String query, int searchType) {
 		RequestParams params = new RequestParams();
 		params.setMethod("GET");
@@ -296,18 +252,13 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			Intent intent = new Intent(this, Profile.class);
 			startActivity(intent);
 		} else if (id == R.id.settings_logout) {
-			Log.d(TAG, "clicked logout");
 			Logout logout = new Logout(this);
 			auth = authPref.getInt(AppPreferences.Auth.KEY_AUTH, -1);
-			Log.d(TAG, "auth in logout->" + auth);
 			if (auth == AppPreferences.Auth.GOOGLE_AUTH) {
-				Log.d(TAG, "logout fron google");
 				logout.logoutFromGoogle();
 			} else if (auth == AppPreferences.Auth.FACEBOOK_AUTH) {
-				Log.d(TAG, "logout fron facebook");
 				logout.logoutFromFacebook();
 			} else {
-				Log.d(TAG, "logout from email");
 				logout.clearSharedPref();
 			}
 		} else if (id == R.id.settings_uploads) {
@@ -316,6 +267,9 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 			startActivity(new Intent(this, Friends.class));
 		} else if (id == R.id.settings_library) {
 			startActivity(new Intent(this, MainActivity.class));
+		}else if(id==R.id.settings_reload){
+			startActivity(new Intent(this, SearchActivity.class));
+			finish();
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -339,7 +293,6 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 		@Override
 		protected void onPostExecute(String result) {
 			dialog.dismiss();
-			Log.d(TAG, "result->" + result);
 			friendsModel = new ArrayList<FriendsModel>();
 			try {
 				JSONObject mainObject = new JSONObject(result);
@@ -347,7 +300,6 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 				if (success == 1) {
 					JSONArray resultsArray = mainObject.getJSONArray("results");
 					for (int i = 0; i < resultsArray.length(); i++) {
-						Log.d(TAG, "first for loop");
 						JSONObject usersObject = resultsArray.getJSONObject(i);
 						JSONArray usersArray = usersObject
 								.getJSONArray("users");
@@ -411,7 +363,6 @@ public class SearchActivity extends Activity implements OnLogoutSuccessful {
 		@Override
 		protected void onPostExecute(String result) {
 			dialog.dismiss();
-			Log.d(TAG, "result->" + result);
 			libraryModel = new ArrayList<LibraryModel>();
 			try {
 				JSONObject mainObject = new JSONObject(result);

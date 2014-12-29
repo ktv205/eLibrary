@@ -52,6 +52,7 @@
     <string name="string_goback">Go back</string>
     <string name="string_coverpic">book cover picture</string>
     <string name="string_popularity">Popularity</string>
+    <string name="string_item_reload">reload</string>
     <string-array name="string_books_category">
         <item>biography</item>
     </string-array>

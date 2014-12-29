@@ -140,7 +140,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			for (int j = 0; j < booksMap.get(key).size(); j++) {
 				final int id = booksMap.get(key).get(j).getBookId();
 				final String title = booksMap.get(key).get(j).getBookName();
-				final String picUrl=booksMap.get(key).get(j).getProfilePic();
+				final String picUrl = booksMap.get(key).get(j).getProfilePic();
 				View singleBook = mInflater.inflate(
 						R.layout.inflate_singlebook, null, false);
 				ImageView imageView = (ImageView) singleBook
@@ -167,7 +167,7 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 
 					@Override
 					public void onClick(View v) {
-						new ViewBookAsyncTask(MainActivity.this,picUrl)
+						new ViewBookAsyncTask(MainActivity.this, picUrl)
 								.execute(getBookPagesParams(String.valueOf(id)));
 
 					}
@@ -176,6 +176,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			}
 			if (parentLinear != null) {
 				parentLinear.addView(singleCategory);
+				View singleLineView = mInflater.inflate(
+						R.layout.inflate_divide_line, null, false);
+				parentLinear.addView(singleLineView);
 
 			}
 		}
@@ -278,8 +281,9 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			startActivity(new Intent(this, Uploads.class));
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
-		} else if (id == R.id.setting_test) {
-
+		} else if (id == R.id.settings_reload) {
+			startActivity(new Intent(this, MainActivity.class));
+			finish();
 		}
 		return super.onOptionsItemSelected(item);
 	}

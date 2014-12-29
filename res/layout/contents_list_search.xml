@@ -8,6 +8,8 @@
         android:id="@+id/contents_list_search_imageview_profilepic"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
         android:layout_weight="1" />
 
     <LinearLayout
@@ -20,13 +22,14 @@
             android:id="@+id/contents_list_search_textview_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textSize="20sp"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/contents_list_search_texview_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/blue" />
 
         <TextView android:id="@+id/contents_list_search_textview_userid"

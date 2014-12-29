@@ -22,13 +22,13 @@
             android:id="@+id/contents_list_books_search_textview_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/contents_list_books_search_texview_author"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/blue" />
 
         <TextView android:id="@+id/contents_list_books_search_textview_bookid" 

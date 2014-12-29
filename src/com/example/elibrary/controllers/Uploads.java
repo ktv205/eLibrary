@@ -192,7 +192,8 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 				@Override
 				public void onClick(View v) {
 					// startActivity(new Intent(Uploads.this, Book.class));
-					new ViewBookAsyncTask(Uploads.this,libraryModel.get(finalJ).getProfilePic())
+					new ViewBookAsyncTask(Uploads.this, libraryModel
+							.get(finalJ).getProfilePic())
 							.execute(getBookPagesParams(String
 									.valueOf(libraryModel.get(finalJ)
 											.getBookId())));
@@ -202,8 +203,20 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 		}
 		if (parentLinear != null) {
 			parentLinear.addView(singleCategory);
+			if (libraryModel.size() == 0) {
+				View uploadsEmptyView = mInflater.inflate(
+						R.layout.contents_empty_uploads, null, false);
+				TextView text = (TextView) uploadsEmptyView
+						.findViewById(R.id.empty_uploads_textview_text);
+				Button button = (Button) uploadsEmptyView
+						.findViewById(R.id.empty_uploads_button_friend);
+				button.setVisibility(View.GONE);
+				text.setText("No uploads to show");
+				parentLinear.addView(uploadsEmptyView);
+			}
 
 		}
+
 		setContentView(parentLinear);
 	}
 
@@ -303,6 +316,9 @@ public class Uploads extends Activity implements OnLogoutSuccessful,
 			startActivity(intent);
 		} else if (id == R.id.settings_friends) {
 			startActivity(new Intent(this, Friends.class));
+		} else if (id == R.id.settings_reload) {
+			startActivity(new Intent(this, Uploads.class));
+			finish();
 		}
 		return true;
 	}

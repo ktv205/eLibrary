@@ -183,7 +183,6 @@ public class LibraryModel implements Parcelable {
 
 		@Override
 		public LibraryModel createFromParcel(Parcel source) {
-			// TODO Auto-generated method stub
 			return new LibraryModel(source);
 		}
 	};
