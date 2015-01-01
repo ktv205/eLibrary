@@ -377,34 +377,54 @@ public class MainActivity extends Activity implements OnLogoutSuccessful {
 			try {
 				JSONObject booksObject = booksObjectByCategory
 						.getJSONObject("books");
-				int j = 0;
-				JSONObject bookObject = null;
-				while (j != -1) {
-					if (booksObject.isNull(String.valueOf(j))) {
-						j = -1;
-					} else {
-						bookObject = booksObject.getJSONObject(String
-								.valueOf(j));
-
-						LibraryModel model = new LibraryModel();
-						model.setCategory(genre);
-						model.setBookAuthor(bookObject.getString("book_author"));
-						model.setBookId(Integer.valueOf(bookObject
-								.getString("book_id")));
-						model.setBookName(bookObject.getString("book_title"));
-						model.setIsbn(bookObject.getString("book_isbn"));
-						model.setAccess(bookObject.getInt("access"));
-						model.setProfilePic(bookObject.getString("book_pic"));
-						JSONObject userObject = bookObject
-								.getJSONObject("uploaded_by");
-						model.setUserName(userObject.getString("user_name"));
-						model.setUser_id(Integer.valueOf(userObject
-								.getString("user_id")));
-						libraryModel.add(model);
-						j++;
-					}
-
+				JSONArray booksArray = booksObject.getJSONArray("books");
+				for (int i = 0; i < booksArray.length(); i++) {
+					LibraryModel model = new LibraryModel();
+					model.setCategory(genre);
+					JSONObject object = booksArray.getJSONObject(i);
+					model.setBookAuthor(object.getString("book_author"));
+					model.setBookId(Integer.valueOf(object
+							.getString("book_id")));
+					model.setBookName(object.getString("book_title"));
+					model.setIsbn(object.getString("book_isbn"));
+					model.setAccess(object.getInt("access"));
+					model.setProfilePic(object.getString("book_pic"));
+					JSONObject userObject = object
+							.getJSONObject("uploaded_by");
+					model.setUserName(userObject.getString("user_name"));
+					model.setUser_id(Integer.valueOf(userObject
+							.getString("user_id")));
+					libraryModel.add(model);
 				}
+				// int j = 0;
+				// JSONObject bookObject = null;
+
+				// while (j != -1) {
+				// if (booksObject.isNull(String.valueOf(j))) {
+				// j = -1;
+				// } else {
+				// bookObject = booksObject.getJSONObject(String
+				// .valueOf(j));
+				//
+				// LibraryModel model = new LibraryModel();
+				// model.setCategory(genre);
+				// model.setBookAuthor(bookObject.getString("book_author"));
+				// model.setBookId(Integer.valueOf(bookObject
+				// .getString("book_id")));
+				// model.setBookName(bookObject.getString("book_title"));
+				// model.setIsbn(bookObject.getString("book_isbn"));
+				// model.setAccess(bookObject.getInt("access"));
+				// model.setProfilePic(bookObject.getString("book_pic"));
+				// JSONObject userObject = bookObject
+				// .getJSONObject("uploaded_by");
+				// model.setUserName(userObject.getString("user_name"));
+				// model.setUser_id(Integer.valueOf(userObject
+				// .getString("user_id")));
+				// libraryModel.add(model);
+				// j++;
+				// }
+				//
+				// }
 				booksMap.put(genre, libraryModel);
 
 			} catch (JSONException e) {

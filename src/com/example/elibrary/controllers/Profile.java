@@ -177,7 +177,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 			rows = 2;
 		} else if (profile.getFriendship().equals("pending")) {
 			friendProfileTextView
-					.setText("waiting for the person to accept your friend request");
+					.setText("waiting for the person to accept your request");
 			friendProfileButton.setText("pending");
 			parentLinear.addView(friendProfileContents);
 			rows = 2;
@@ -193,14 +193,15 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 
 			@Override
 			public void onClick(View v) {
+				Log.d(TAG,"in onclick");
 				if (profile.getFriendship().equals("no")) {
 					new SendFriendRequestAsyncTask()
-							.execute(getFriendRequestParams("add_friend",
+							.execute(getFriendRequestParams("no",
 									String.valueOf(profile.getUser_id())));
 					friendProfileButton.setText("pending");
 				} else if (profile.getFriendship().equals("withheld")) {
 					new SendFriendRequestAsyncTask()
-							.execute(getFriendRequestParams("accept_friend",
+							.execute(getFriendRequestParams("withheld",
 									String.valueOf(profile.getUser_id())));
 					friendProfileButton.setText("friends");
 				}
@@ -493,6 +494,7 @@ public class Profile extends Activity implements OnLogoutSuccessful {
 				AppPreferences.Auth.KEY_USERID, -1)));
 		params.setParam("user", user_id);
 		if (response.equals("withheld")) {
+			Log.d(TAG,"with held in getFriend params");
 			params.setParam("action", "accept_friend");
 		} else if (response.equals("no")) {
 			params.setParam("action", "add_friend");
